@@ -5,12 +5,12 @@ Runs fully in the browser (no server code, no AI API, nothing uploaded). Same da
 
     npm install          # only for the tests / preview script
     npm start            # http://localhost:8090  (any static server works)
-    npm test             # hand-labelled tests on test/fixtures/screens/shot1-6
+    npm test             # logic tests; screenshot checks run only if test/fixtures/screens is present locally
     npm run eval         # per-field accuracy vs the hand labels
     node tools/preview.js  # headless Chrome run with the real screenshots -> preview/*.png (needs npm start)
 
 ## What it reads per tile
-slot, class (STR/AGI/INT; a "set" is just the class, a full set = helmet + armor + boots + weapon of one class), level (0-200), diamonds (0-3), refined (platinum on the whole tile, decided by majority; never "mixed") and equipped (E badge). Only yellow (Mythic) tiles. Sparkles and glow are ignored.
+slot, class (STR/AGI/INT; a "set" is just the class, a full set = helmet + armor + boots + weapon of one class), diamonds (0-3), refined (platinum on the whole tile, decided by majority; never "mixed") and equipped (E badge). Level is ignored. Only yellow (Mythic) tiles. Sparkles and glow are ignored.
 Tiles cut off or hidden behind the "Filter Applied" pill are merged across overlapping screenshots (never double counted).
 
 ## Files
@@ -23,4 +23,4 @@ Tiles cut off or hidden behind the "Filter Applied" pill are merged across overl
 1. `findGrid`: choose the tile cluster by area (`grp.length * w*w`), not by count only.
 2. `readNumberOnce`: for `kind === "level"` drop the leading bold "+" glyph when it is read as a 4th glyph (it touches pale artwork on dim tiles).
 
-Nothing here is pushed or deployed.
+Inventory screenshots are not stored in this repo.
