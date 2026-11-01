@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><script>(function(){var m="screenshot",h=location.hash;try{m=localStorage.getItem("souls-mode")==="manual"?"manual":"screenshot"}catch(e){}if(h==="#manual"||h==="#sec-manual")m="manual";else if(/^#(screenshot|sec-upload|sec-check|sec-advice)$/.test(h))m="screenshot";document.documentElement.setAttribute("data-mode",m)})();window.SOULS_V="202611020256"</script><link rel="icon" type="image/png" href="icons/ui/noah.png?v=202611020256"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SOULS Artifact Advisor</title>
+<style>
+@font-face{font-family:"Cinzel";src:url(fonts/cinzel-700.woff2?v=202611020256) format("woff2");font-weight:700;font-display:swap}
+:root{--bg:#14100b;--panel:#201912;--panel2:#2a241b;--line:#4d3f27;--line2:#5a4a2e;--gold:#e3b95b;--gold2:#c99a3b;--ink:#f0e6d2;--mut:#a89a7c;--warn:#ffb35c;--err:#ff8a7a;--ok:#9bd37a;
+  --mythic:#dfa856;--legendary:#d98560;--primal:#88e4e0;
+  --head:"Cinzel","Trajan Pro","Palatino Linotype","Book Antiqua",Palatino,"Iowan Old Style",Georgia,serif}
+*{box-sizing:border-box} [hidden]{display:none!important}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--sticky,0px) + 1rem)}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45;color:var(--ink);
+  background:radial-gradient(1100px 520px at 18% -8%,#2f2214 0,transparent 62%),repeating-linear-gradient(45deg,rgba(255,255,255,.014) 0 2px,transparent 2px 5px),var(--bg)}
+h1,h2,h3{font-family:var(--head);font-weight:700;letter-spacing:.02em;margin:0}
+h2{font-size:1.15rem;color:var(--gold)} h3{font-size:1.2rem} h4{margin:1rem 0 .4rem;font-size:.95rem;color:var(--gold);letter-spacing:.03em}
+p{margin:.3rem 0} small,.muted{color:var(--mut)}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+a{color:var(--gold)} .skip{position:absolute;left:-999px;top:0;background:var(--gold);color:#1b1208;padding:.6rem 1rem;z-index:50} .skip:focus{left:0}
+:focus-visible{outline:3px solid #f3d98f;outline-offset:2px}
+
+/* header */
+.top{max-width:1400px;margin:0 auto;padding:1rem 1rem .6rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.7rem} .noah{width:40px;height:40px;flex:none;object-fit:contain;filter:drop-shadow(0 0 8px rgba(227,185,91,.45))} .gem{color:var(--gold);font-size:1.6rem;text-shadow:0 0 12px rgba(227,185,91,.55)}
+h1{font-size:1.5rem;color:var(--ink);text-shadow:0 2px 0 #000}
+.badge{display:flex;align-items:center;gap:.6rem;padding:.45rem .9rem;border:1px solid var(--line2);border-radius:999px;background:rgba(32,25,18,.85)}
+.badge svg{flex:none;color:var(--gold)} .badge b{display:block;font-size:.85rem} .badge small{display:block;font-size:.78rem}
+
+/* Screenshot | Manual switch (top right) and the per-mode views */
+.modesw{display:inline-flex;padding:3px;gap:3px;border:1px solid var(--line2);border-radius:999px;background:rgba(32,25,18,.85)}
+.modesw button{min-height:44px;min-width:7.2rem;padding:0 1rem;border:0;border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:.92rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;transition:background .15s,color .15s}
+.modesw button:hover{background:rgba(227,185,91,.12)}
+.modesw button[aria-checked=true]{background:var(--gold);color:#1b1208;font-weight:700}
+.modesw button:focus-visible{outline:3px solid #f3d98f;outline-offset:2px}
+.priv{display:flex;align-items:center;gap:.4rem;margin:.6rem 0 0;font-size:.78rem;color:var(--mut)} .priv svg{flex:none;color:var(--gold)}
+html[data-mode=screenshot] #sec-manual{display:none}
+html[data-mode=manual] .cols,html[data-mode=manual] #stepper{display:none}
+@media (max-width:760px){.modesw button{min-width:0;padding:0 .65rem;font-size:.84rem}}
+
+.totop{display:none;position:fixed;right:.8rem;bottom:.8rem;z-index:30;width:48px;height:48px;border-radius:50%;border:1px solid var(--gold);background:rgba(32,25,18,.94);color:var(--gold);box-shadow:0 4px 14px rgba(0,0,0,.55);cursor:pointer;align-items:center;justify-content:center;padding:0}
+.totop:hover{background:var(--gold);color:#1b1208} .totop[hidden]{display:none!important}
+@media (max-width:760px){.totop:not([hidden]){display:inline-flex} #howto{order:-1}}
+.hr{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;justify-content:flex-end}
+.plbtn{min-height:44px;padding:0 1rem;border:1px solid var(--line2);border-radius:999px;background:rgba(32,25,18,.85);color:var(--gold);font:inherit;font-size:.92rem;display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;transition:background .15s}
+.plbtn:hover{background:rgba(227,185,91,.14)} .plbtn:focus-visible{outline:3px solid #f3d98f;outline-offset:2px}
+dialog#prioDlg{width:min(640px,calc(100vw - 1.2rem));max-height:calc(100vh - 2rem);max-height:calc(100dvh - 2rem);padding:0;border:1px solid var(--gold);border-radius:14px;background:var(--panel);color:var(--ink);box-shadow:0 12px 50px rgba(0,0,0,.7);overflow:hidden}
+dialog#prioDlg[open]{display:flex;flex-direction:column}
+dialog#prioDlg::backdrop{background:rgba(8,5,2,.78)}
+.dlg-h{display:flex;justify-content:space-between;align-items:flex-start;gap:.8rem;padding:1rem 1rem .7rem;border-bottom:1px solid var(--line)}
+.dlg-x{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line2);background:transparent;color:var(--gold);font-size:1.6rem;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center} .dlg-x:hover{background:rgba(227,185,91,.14)}
+.dlg-b{overflow-y:auto;padding:.4rem 1rem 1.2rem;-webkit-overflow-scrolling:touch} .dlg-b:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+ul.careful li .pn{color:var(--mut)}
+@media (max-width:760px){.hr{flex-wrap:nowrap;gap:.4rem;flex:none} .plbtn{width:44px;padding:0;justify-content:center} .plbtn span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap} .top{flex-wrap:wrap}}
+/* layout */
+.layout{max-width:1400px;margin:0 auto;padding:0 1rem 3rem;display:grid;grid-template-columns:232px minmax(0,1fr);gap:1.25rem;align-items:start}
+.side{position:sticky;top:1rem;display:grid;gap:1rem}
+#stepper ol{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
+#stepper a,.manual{display:flex;align-items:center;gap:.7rem;min-height:56px;padding:.55rem .75rem;border-radius:8px;border:1px solid transparent;color:var(--ink);text-decoration:none}
+#stepper a:hover,.manual:hover{background:#2a2117}
+#stepper a[aria-current=step]{background:#2f2517;border-color:var(--line2);box-shadow:inset 3px 0 0 var(--gold)}
+#stepper .n{flex:none;width:32px;height:32px;border-radius:50%;border:2px solid var(--gold2);display:grid;place-items:center;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;font-weight:700;color:var(--gold)}
+#stepper a[data-state=done] .n{background:var(--gold);color:#1b1208}
+#stepper a[data-state=done] .n::after{content:"\2713"} #stepper a[data-state=done] .n span{display:none}
+#stepper b{display:block;font-size:.95rem} #stepper small{display:block;font-size:.78rem;line-height:1.25}
+.manual{margin-top:.35rem;border-top:1px solid var(--line);border-radius:0 0 8px 8px;color:var(--ink)} .manual .n{color:var(--gold)}
+#howto{padding:.8rem .95rem;border:1px solid var(--line2);border-radius:10px;background:linear-gradient(180deg,#2b2216,#211a11);font-size:.9rem}
+#howto b{font-family:var(--head);color:var(--gold)} #howto ol{margin:.4rem 0 0 1.15rem;padding:0} #howto li{margin:.25rem 0}
+
+/* cards */
+.cols{display:grid;gap:1rem}
+.card{position:relative;margin:0 0 1rem;padding:1.1rem 1.15rem;border:1px solid var(--line);border-radius:12px;
+  background:linear-gradient(180deg,#271f15,#1c160f);box-shadow:inset 0 1px 0 rgba(227,185,91,.16),0 8px 22px rgba(0,0,0,.4)}
+.card::before{content:"";position:absolute;left:14px;right:14px;top:-1px;height:2px;background:linear-gradient(90deg,transparent,var(--gold2),transparent);opacity:.7}
+.card-h{display:flex;gap:.8rem;align-items:flex-start;margin-bottom:.8rem}
+.card-h .num{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;font-weight:700;color:#1b1208;background:linear-gradient(180deg,#f0d487,#c99a3b)}
+.card-h p{font-size:.9rem;margin:.1rem 0 0}
+
+/* buttons and fields */
+button,.btn{min-height:44px;padding:.5rem 1.1rem;border-radius:7px;border:1px solid var(--line2);background:#3a3226;color:var(--ink);font:inherit;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:.5rem}
+button:hover,.btn:hover{background:#4a4030}
+button.primary,.btn.primary{background:linear-gradient(180deg,#f0d487,#c99a3b);border-color:#f3d98f;color:#1b1208;font-weight:700;padding:.5rem 1.4rem}
+button.primary:hover,.btn.primary:hover{filter:brightness(1.08)}
+button.link{background:none;border:0;color:var(--gold);text-decoration:underline;font-weight:500;padding:.5rem .4rem}
+button:disabled{opacity:.55;cursor:default}
+input,select{min-height:44px;padding:.45rem .65rem;background:#17120c;color:var(--ink);border:1px solid var(--line2);border-radius:7px;font:inherit;min-width:0}
+input::placeholder{color:#9a8b6c}
+input[type=checkbox]{min-height:0;width:22px;height:22px;accent-color:var(--gold2);flex:none}
+.check{display:flex;align-items:center;gap:.6rem;min-height:44px;cursor:pointer}
+label.field{display:grid;gap:.3rem;margin:.3rem 0}
+label.field .lab{display:flex;align-items:center;gap:.5rem;font-weight:600}
+.row{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;margin:.6rem 0}
+.row-end{align-items:flex-end}
+.ai{width:20px;height:20px;vertical-align:middle;border-radius:3px;margin-right:4px}
+
+/* upload */
+.up-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:1rem}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;text-align:center;min-height:200px;padding:1rem;border:2px dashed var(--line2);border-radius:12px;background:rgba(0,0,0,.18);cursor:pointer}
+.drop:hover,.drop.over,.drop:focus-within{border-color:var(--gold);background:rgba(227,185,91,.07)}
+.drop svg{color:var(--gold2)} .drop b{font-size:1.02rem} .drop small{font-size:.82rem}
+.example{margin:0;padding:.7rem;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.18)}
+.example figcaption{font-weight:600;margin-bottom:.4rem;font-size:.9rem}
+.example img{display:block;width:100%;max-height:150px;object-fit:cover;object-position:top;border-radius:8px;border:1px solid var(--line2)}
+.tip{font-size:.85rem;color:var(--mut);margin:.5rem 0 0} .tip b{color:var(--gold)}
+#picked{margin-top:1rem}
+.picked-h{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+#thumbs{list-style:none;margin:.4rem 0 0;padding:0;display:flex;gap:0 .6rem;flex-wrap:wrap}
+#thumbs li{position:relative;width:104px;margin-top:32px}
+#thumbs img,#thumbs .file{display:block;width:104px;height:84px;object-fit:cover;object-position:top;border-radius:8px;border:1px solid var(--line2);background:#17120c}
+#thumbs .file{display:grid;place-items:center;font-size:.75rem;padding:.3rem;text-align:center;overflow:hidden;overflow-wrap:anywhere;color:var(--mut)}
+/* the round x is 28px and sits above the thumbnail corner; the button itself is a 44px tap area (padding) that is transparent */
+#thumbs .x{position:absolute;top:-38px;right:-8px;width:44px;height:44px;min-height:44px;padding:0;border:0;border-radius:0;background:none;color:var(--ink);font-size:0;line-height:1;isolation:isolate;display:flex;align-items:center;justify-content:center}
+#thumbs .x .xi,.dlg-x .xi{display:block;flex:none;pointer-events:none}
+#thumbs .x::before{content:"";box-sizing:border-box;position:absolute;z-index:-1;inset:8px;border-radius:50%;background:#17120c;border:1px solid var(--line2)}
+#thumbs .x:hover::before{background:#4a4030}
+#thumbs .fname{display:block;font-size:.72rem;color:var(--mut);margin-top:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#status{color:var(--gold)} #status.err,.err{color:var(--err)} .warn{color:var(--warn)} #notes ul{margin:.3rem 0;padding-left:1.1rem}
+
+/* check */
+#summary{margin:.2rem 0 .6rem;font-size:.95rem}
+#chips{display:flex;gap:.6rem;flex-wrap:wrap;margin:.2rem 0 .8rem}
+.chip{flex:1 1 130px;display:flex;align-items:baseline;gap:.5rem;padding:.55rem .8rem;border:1px solid var(--line2);border-radius:10px;background:#1a140d}
+.chip b{font-family:var(--head);font-size:1.5rem;color:var(--gold)} .chip span{font-size:.85rem;color:var(--mut)}
+.chip[data-k=check] b{color:var(--warn)} .chip[data-k=check].zero b{color:var(--ok)} .chip[data-k=ignored] b{color:var(--mut)}
+#totals{margin:.6rem 0;padding:.7rem .9rem;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.18)}
+#totals h3{font-size:1rem;margin:.2rem 0} #totals h3.t{color:var(--gold)}
+#totals h3.g{font-size:.82rem;color:var(--mut);font-family:system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;margin-top:.5rem}
+#totals ul{list-style:none;margin:.3rem 0;padding:0;display:flex;flex-wrap:wrap;gap:.4rem}
+#totals li{display:flex;align-items:center;gap:.2rem;padding:.2rem .6rem .2rem .3rem;border-radius:999px;background:#2a2218;border:1px solid var(--line);max-width:100%}
+#totals li.r-mythic{border-color:var(--mythic)} #totals li.r-legendary{border-color:var(--legendary)} #totals li.r-primal{border-color:var(--primal)}
+#totals li b{color:var(--gold)}
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin:.8rem 0 .5rem}
+.tools input[type=search]{flex:1 1 200px}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:#17120c;min-width:44px}
+.seg button[aria-pressed=true]{background:var(--gold);color:#1b1208}
+#wrap{max-height:460px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.15)}
+table{border-collapse:collapse;width:100%}
+thead th{position:sticky;top:0;background:#2a2218;z-index:1;color:var(--gold);font-size:.78rem;letter-spacing:.05em;text-transform:uppercase}
+th,td{padding:.4rem .55rem;border-bottom:1px solid #35291a;text-align:left;font-size:.9rem;vertical-align:middle}
+tr.flag{background:#3d2a14;box-shadow:inset 3px 0 0 var(--warn)} td.chk{color:var(--warn);font-weight:700} td.chk:not(:empty)::before{content:"\26A0\00a0"} td.chk small{display:block;margin-top:.2rem;font-weight:400;color:var(--mut)}
+td.thumb img{width:52px;height:52px;border-radius:6px;display:block;border:1px solid var(--line2)}
+td input[type=number]{width:5rem}
+th .dm{font-size:.7em;color:var(--gold2)}
+.nm{display:flex;align-items:center;gap:.5rem} .nm .ai{width:32px;height:32px;margin:0;flex:none} .nm select{min-width:0;flex:1}
+.pill{display:inline-block;margin-top:.2rem;padding:0 .5rem;border-radius:999px;border:1px solid var(--line2);font-size:.75rem;color:var(--mut)}
+.pill.r-mythic{color:var(--mythic);border-color:var(--mythic)} .pill.r-legendary{color:var(--legendary);border-color:var(--legendary)} .pill.r-primal{color:var(--primal);border-color:var(--primal)}
+#rowmsg,#addMsg{color:var(--warn);font-size:.9rem} #showing{font-size:.85rem}
+#status:empty,#notes:empty,#rowmsg:empty,#addMsg:empty,#showing:empty{display:none}
+
+/* advice */
+.opts{display:grid;gap:.4rem;margin-bottom:.8rem}
+#essence{width:100%}
+#out,#out2{margin-top:1rem;min-height:3rem}
+.empty{color:var(--mut)}
+.prog{font-size:.92rem;color:var(--mut);margin:0 0 .6rem}
+.rec{padding:1rem 1.1rem;border:1px solid var(--gold2);border-radius:12px;background:linear-gradient(180deg,rgba(227,185,91,.14),rgba(227,185,91,.04));box-shadow:0 0 22px rgba(227,185,91,.08)}
+.rec-tag{font-weight:700;font-size:.85rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold)}
+.rec-body{display:flex;gap:1rem;align-items:center;margin:.7rem 0}
+.frame{flex:none;display:grid;place-items:center;width:92px;height:92px;border-radius:12px;border:3px solid var(--mythic);background:#17120c;box-shadow:0 0 16px rgba(0,0,0,.6),inset 0 0 12px rgba(0,0,0,.6)}
+.frame.r-legendary{border-color:var(--legendary)} .frame.r-primal{border-color:var(--primal)} .frame.r-ui{border-color:var(--line2)}
+.frame img{width:76px;height:76px;object-fit:contain;display:block}
+.rec h3{font-size:1.25rem;line-height:1.25;color:var(--ink)} .rec p{color:var(--mut);font-size:.92rem}
+.rec-cost{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem}
+.rec-cost>div{padding:.55rem .8rem;border:1px solid var(--line2);border-radius:10px;background:rgba(0,0,0,.25)}
+.rec-cost small{display:block;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+/* Check list sections: Mythic / Legendary, collapsible */
+table#items tr.grp td{padding:0;border:0;background:none} table#items tr.grp:hover{background:none}
+button.grp-h{width:100%;min-height:48px;justify-content:flex-start;gap:.6rem;padding:.4rem .8rem;margin:.5rem 0 .1rem;background:#2a2217;border:1px solid var(--line2);border-radius:10px;text-align:left}
+button.grp-h:hover{background:#352b1b} .grp-h .gt{font-family:var(--head);font-size:1.05rem;color:var(--gold)} .r-mythic .grp-h .gt{color:var(--mythic)} .r-legendary .grp-h .gt{color:var(--legendary)} .r-primal .grp-h .gt{color:var(--primal)}
+.grp-h .gc{color:var(--mut);font-weight:600} .grp-h .gn{margin-left:auto;padding:0 .55rem;border-radius:999px;border:1px solid var(--warn);color:var(--warn);font-size:.78rem;font-weight:700;line-height:1.6;white-space:nowrap}
+.grp-h .chev{flex:none;width:.6rem;height:.6rem;border-right:2px solid var(--gold);border-bottom:2px solid var(--gold);transform:rotate(45deg);margin:-.2rem .2rem 0 .1rem;transition:transform .15s}
+.grp-h[aria-expanded=false] .chev{transform:rotate(-45deg);margin:0 .2rem 0 .1rem}
+/* row buttons: Confirm (green check) next to Remove row */
+td.acts{white-space:nowrap} td.acts button{min-height:44px;padding:.35rem .8rem} td.acts button+button{margin-left:.5rem}
+button.ok{background:rgba(155,211,122,.1);border-color:#6f9a58;color:var(--ink)} button.ok:hover{background:rgba(155,211,122,.2)}
+button.ok .tick{color:var(--ok);font-weight:800;font-size:1.05em;line-height:1}
+/* Get advice bar at the end of the Check step: shown when nothing needs a check */
+#checkNext{position:sticky;bottom:.6rem;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;margin-top:1rem;padding:.7rem .9rem;border:1px solid var(--gold2);border-radius:12px;background:linear-gradient(180deg,#2d2414,#1d1710);box-shadow:0 6px 22px rgba(0,0,0,.55),0 0 18px rgba(227,185,91,.15)}
+#checkNext[hidden]{display:none} #checkNextMsg{color:var(--ok);font-weight:700} #checkNext button .arr{color:inherit;font-weight:inherit} #checkNext button{flex:1 1 220px;min-height:52px;font-size:1.05rem}
+/* Recommended to craft: Change recommendation (muted red) at the top right, wraps under the title on a narrow card */
+.rec-top{display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:nowrap;min-height:0}
+.rec-top .rec-tag{flex:1 1 auto;min-width:0}
+.rec .chg{position:relative;flex:none;margin:0 0 0 auto;min-height:0;height:1.65rem;padding:0 .75rem;font-size:.75rem;line-height:1;white-space:nowrap;border-radius:999px;border:1px solid #8a4742;background:rgba(150,60,54,.16);color:#e59a90;font-weight:600}
+.rec .chg::after{content:"";position:absolute;inset:-10px -6px}
+.rec .chg:hover{background:rgba(150,60,54,.3);color:#f2b3aa}
+/* Share image buttons (inside What artifact you can craft?) */
+.share{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:.1rem 0 .7rem}
+.share button{min-height:44px;font-size:.88rem}
+.share-msg{flex:1 1 12rem;min-width:0;font-size:.85rem;color:var(--mut)}
+/* What artifact you can craft? (expandable, closed by default, inside the Recommended card) */
+details.can{margin-top:.8rem;border:1px solid var(--line2);border-radius:10px;background:rgba(0,0,0,.2)}
+details.can>summary{display:flex;align-items:center;gap:.6rem;min-height:44px;padding:.35rem .8rem;cursor:pointer;list-style:none;font-weight:700;color:var(--ink)}
+details.can>summary::-webkit-details-marker{display:none}
+details.can .can-t{flex:1 1 auto;min-width:0}
+details.can .can-n{flex:none;min-width:1.5rem;padding:0 .45rem;border:1px solid var(--gold2);border-radius:999px;font-size:.78rem;line-height:1.5;text-align:center;color:var(--gold);background:rgba(227,185,91,.08)}
+details.can .can-ch{flex:none;width:.6rem;height:.6rem;margin:0 .2rem 0 .1rem;border-right:2px solid var(--gold);border-bottom:2px solid var(--gold);transform:rotate(45deg) translateY(-2px);transition:transform .15s}
+details.can[open]>summary .can-ch{transform:rotate(-135deg) translateY(-2px)}
+details.can>summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:10px}
+details.can .can-body{padding:.2rem .7rem .8rem}
+details.can .can-sub,details.can .can-empty{margin:.1rem 0 .6rem;color:var(--mut);font-size:.88rem}
+details.can .can-empty{padding:.4rem 0 .2rem}
+ul.lst.can-list li{grid-template-columns:40px minmax(0,1fr) auto}
+.enough{white-space:nowrap;padding:.1rem .55rem;border-radius:999px;border:1px solid var(--gold2);font-size:.75rem;font-weight:600;color:var(--ok);background:rgba(155,211,122,.08)}
+.enough.no{color:var(--mut);border-color:var(--line2);background:rgba(0,0,0,.25)}
+ul.lst .pl.never{color:#e59a90;border-color:#8a4742;background:rgba(150,60,54,.14)} ul.lst .pl.caution{color:var(--warn);border-color:rgba(255,179,92,.55);background:rgba(255,179,92,.08)}
+@media (max-width:520px){ul.lst.can-list li{grid-template-columns:40px minmax(0,1fr)} ul.lst.can-list li>.enough{grid-column:2;justify-self:start}}
+@media (prefers-reduced-motion:reduce){details.can .can-ch{transition:none}}
+.skipbar{margin:0 0 .6rem;font-size:.88rem;color:var(--mut)} .skipbar button.link{min-height:44px;padding:.2rem .5rem}
+.ess{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--head);font-size:1.3rem;color:var(--gold)} .ess img{width:26px;height:30px;object-fit:contain;margin:0}
+.more{margin:.7rem 0 0;font-size:.9rem}
+ul.miss{list-style:none;margin:0;padding:0;display:grid;gap:.45rem}
+small.pn{display:block;color:var(--muted,#9a8f7a);font-size:.78rem;font-weight:400;line-height:1.25;margin-top:.1rem}
+.pn-row{margin:.1rem 0 .3rem}
+/* compact rows: Also recommended, Next to craft, See every artifact on the list */
+ul.lst{list-style:none;margin:0;padding:0;display:grid;gap:.4rem}
+ul.lst li{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:.6rem;align-items:center;padding:.4rem .6rem;border:1px solid var(--line);border-radius:8px;background:rgba(0,0,0,.2);font-size:.92rem}
+ul.lst .frame{width:40px;height:40px;border-width:2px;border-radius:8px;box-shadow:none} ul.lst .frame img{width:32px;height:32px}
+.frame{position:relative}
+.ob{white-space:nowrap;position:absolute;left:-7px;top:-7px;min-width:1.7rem;padding:0 .35rem;border-radius:999px;background:var(--gold);color:#1b1208;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:800;font-size:.7rem;line-height:1.35rem;text-align:center;border:2px solid var(--panel);box-shadow:0 1px 4px rgba(0,0,0,.6);z-index:1}
+ul.lst .ob{position:static;min-width:0;padding:0 .5rem;font-size:.7rem;line-height:1.5;border:0;flex:none}
+.ob.big{left:-9px;top:-9px;min-width:3.4rem;font-size:.82rem;line-height:1.7rem;white-space:nowrap}
+ul.lst .rb{min-width:0} .rec .rt{display:flex;flex-wrap:wrap;gap:.3rem;margin:.1rem 0 .35rem} .rec .rt:empty{display:none} ul.lst .rt,.rec .rt{display:flex;flex-wrap:wrap;align-items:center;gap:.1rem .4rem;line-height:1.3} ul.lst .rt b{color:var(--ink);font-weight:700}
+ul.lst .rt.one{flex-wrap:nowrap} ul.lst .rt.one .an{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ul.lst .pl,.rec .pl{flex:none;padding:0 .45rem;border:1px solid var(--line2);border-radius:999px;font-size:.7rem;line-height:1.5;color:var(--mut);white-space:nowrap}
+ul.lst .pl.hl,.rec .pl.hl{color:var(--gold);border-color:var(--gold2);background:rgba(227,185,91,.08)}
+ul.lst small{display:block;margin:.05rem 0 0;color:var(--mut);font-size:.78rem;line-height:1.3;font-weight:400}
+ul.lst small.need{color:var(--mut)} ul.lst small.need.ok{color:var(--ok)}
+ul.lst .ai{width:16px;height:16px;margin:0 3px 0 0}
+ul.lst .ec{display:inline-flex;align-items:center;gap:.3rem;white-space:nowrap;padding:.1rem .55rem;border:1px solid var(--line2);border-radius:999px;background:rgba(0,0,0,.25);font-family:var(--head);font-size:.95rem;color:var(--gold)} ul.lst .ec img{width:16px;height:18px;object-fit:contain;margin:0}
+ul.lst small .ec{display:inline-flex;font-size:.78rem;padding:0 .4rem}
+ul.lst .st{align-self:center;white-space:nowrap;padding:.1rem .6rem;border-radius:999px;border:1px solid;font-size:.78rem;font-weight:600}
+ul.lst .st.done{color:var(--ok);border-color:var(--gold2);background:rgba(155,211,122,.08)}
+ul.lst .st.miss{color:var(--warn);border-color:rgba(255,179,92,.55);background:rgba(255,179,92,.08)}
+ul.lst.al li{padding:.3rem .5rem;gap:.5rem}
+h5.tg{margin:.8rem 0 .3rem;font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:var(--gold)} #details h5.tg:first-child{margin-top:.3rem}
+ul.miss li{padding:.5rem .7rem;border:1px solid var(--line);border-radius:8px;background:rgba(0,0,0,.2);font-size:.92rem}
+.note{margin:.7rem 0 0;padding:.5rem .7rem;border-left:3px solid var(--warn);background:rgba(255,179,92,.08);font-size:.9rem;color:var(--warn)}
+details.sub{margin-top:.9rem;border-top:1px solid var(--line);padding-top:.5rem}
+details.sub summary,#sec-manual>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600;color:var(--gold);gap:.6rem;padding:0 .5rem;border-radius:8px;list-style:none;transition:background .15s}
+details.sub summary::-webkit-details-marker,#sec-manual>summary::-webkit-details-marker{display:none}
+/* expand indicator: a gold chevron on the right, turns over when the section is open */
+details.sub summary::after,#sec-manual>summary::after{content:"";flex:none;margin:0 .35rem 0 auto;width:.6rem;height:.6rem;border-right:2.5px solid var(--gold);border-bottom:2.5px solid var(--gold);transform:translateY(-.15rem) rotate(45deg);transition:transform .2s ease,border-color .15s}
+details.sub[open]>summary::after,#sec-manual[open]>summary::after{transform:translateY(.15rem) rotate(225deg)}
+details.sub summary:hover,#sec-manual>summary:hover{background:rgba(227,185,91,.09)}
+details.sub summary:hover::after,#sec-manual>summary:hover::after{border-color:#f3d78f}
+details.sub summary:focus-visible,#sec-manual>summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){details.sub summary::after,#sec-manual>summary::after{transition:none}}
+details.sub ul{margin:.3rem 0 .6rem 1.1rem;padding:0;font-size:.9rem;color:var(--mut)} details.sub li{margin:.3rem 0}
+
+/* manual */
+#sec-manual>summary{font-family:var(--head);font-size:1.05rem}
+#sec-manual fieldset{border:1px solid var(--line);border-radius:10px;margin:.8rem 0;min-width:0} #sec-manual legend{color:var(--gold);font-weight:600}
+#sec-manual label.f{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.3rem 0;align-items:center}
+#sec-manual label.f input{width:100%}
+#sec-manual details.grp{margin:.8rem 0 0} #sec-manual summary small{color:var(--mut);font-weight:400} #sec-manual .gnote{font-size:.85rem;margin:.2rem .5rem .4rem}
+#sec-manual .tabs{display:flex;gap:.35rem;overflow-x:auto;padding:.3rem .2rem .4rem;margin:.2rem 0;scrollbar-width:thin}
+#sec-manual .tab{flex:none;min-height:44px;padding:0 .8rem;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:.92rem;cursor:pointer;display:inline-flex;align-items:center;gap:.35rem;white-space:nowrap;transition:background .15s,border-color .15s}
+#sec-manual .tab small{margin-left:.1rem} #sec-manual .tab .ci{width:20px;height:20px;flex:none;display:block}
+#sec-manual .tab:hover{background:rgba(227,185,91,.09)}
+#sec-manual .tab[aria-selected=true]{border-color:var(--gold);color:var(--gold);background:rgba(227,185,91,.14);font-weight:600}
+#sec-manual .tab:focus-visible,#sec-manual .tabpanel:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#sec-manual .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;padding:.2rem}
+#sec-manual label.cardf{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.35rem;margin:0;padding:.55rem .4rem;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.18)}
+#sec-manual label.cardf:focus-within{border-color:var(--gold)}
+#sec-manual label.cardf img{width:40px;height:40px;border-radius:8px}
+#sec-manual label.cardf .fl{font-size:.85rem;line-height:1.2;min-height:2.4em;display:flex;align-items:center;justify-content:center}
+#sec-manual label.cardf input{width:4.2rem;min-height:44px;text-align:center}
+@media (max-width:600px){#sec-manual .cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+h5.tg + .gnote{font-size:.85rem;margin:.1rem 0 .4rem}
+
+
+/* the artifact list turns into cards whenever its box is narrow (phone, or the half-width column on a desktop) */
+#wrap{container:wrap/inline-size}
+@container wrap (max-width:920px){
+  table#items,table#items tbody{display:block;width:100%}
+  table#items thead{display:none}
+  table#items tr{display:grid;grid-template-columns:56px repeat(3,minmax(0,1fr));gap:.35rem .6rem;padding:.6rem;margin:.5rem 0;border:1px solid var(--line);border-radius:10px;background:#221b12}
+  table#items tr.flag{background:#3d2a14}
+  table#items tr.grp{display:block;padding:0;margin:0;border:0;background:none}
+  table#items td{display:block;border:0;padding:0;min-width:0}
+  table#items td[data-l]::before{content:attr(data-l);display:block;font-size:.75rem;color:var(--mut)}
+  table#items td.thumb{grid-row:1 / 3;grid-column:1}
+  table#items td[data-l=Artifact]{grid-row:1;grid-column:2 / 5}
+  table#items td[data-l=Artifact]::before{display:none}
+  table#items td[data-l=Transcendence]::before{content:"Transcendence \25C6";overflow-wrap:anywhere}
+  table#items td[data-l='Number shown']{grid-row:2;grid-column:2}
+  table#items td[data-l=Transcendence]{grid-row:2;grid-column:3}
+  table#items td[data-l='Copies']{grid-row:2;grid-column:4}
+  table#items td input[type=number],table#items td input,table#items td select{width:100%}
+  table#items td.chk{grid-column:1 / 5}
+  table#items td.chk:empty{display:none}
+  table#items td.chk::before{display:none}
+  table#items td.rm{grid-column:1 / 5}
+  table#items td.rm{display:flex;gap:.5rem} table#items td.rm button{flex:1 1 0;width:auto;margin:0}
+}
+@container wrap (max-width:440px){
+  table#items tr{grid-template-columns:56px 1fr 1fr}
+  table#items td.thumb{grid-row:1;grid-column:1}
+  table#items td[data-l=Artifact]{grid-column:2 / 4}
+  table#items td[data-l='Number shown']{grid-row:auto;grid-column:1 / 3}
+  table#items td[data-l=Transcendence]{grid-row:auto;grid-column:3}
+  table#items td[data-l='Copies']{grid-row:auto;grid-column:1 / 4}
+  table#items td.chk,table#items td.rm{grid-column:1 / 4}
+}
+.colA{container:cola/inline-size}
+@container cola (max-width:560px){.up-grid{grid-template-columns:minmax(0,1fr)} .example img{max-height:120px}}
+@media (max-width:1023px){.cols{grid-template-columns:minmax(0,1fr)} #sec-advice{min-height:calc(100vh - var(--sticky,0px) - 2rem)}} /* stacked: the last step is tall enough to scroll its top under the step bar */
+@media (min-width:1024px){.cols{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:start}}
+@media (max-width:760px){
+  body{font-size:16px}
+  .top{padding:.7rem .7rem .3rem;flex-wrap:wrap;gap:.4rem .5rem} .brand{min-width:0;gap:.45rem;flex:1 1 7.8rem} .hr{margin-left:auto} .modesw button span{display:none} .gem{font-size:1.25rem} .noah{width:32px;height:32px} h1{font-size:1.05rem;line-height:1.2}
+  .badge{flex:none;gap:.4rem;padding:.3rem .65rem} .badge svg{width:16px;height:16px} .badge b{font-size:.72rem;line-height:1.15;max-width:6.5rem} .badge small{display:none}
+  .layout{grid-template-columns:minmax(0,1fr);padding:0 .6rem 2rem;gap:.8rem}
+  .side{display:contents}
+  #stepper{position:sticky;top:0;z-index:20;margin:0 -.6rem;padding:.4rem .6rem;background:#14100b;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr);gap:.25rem;align-items:stretch}
+  #stepper ol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.25rem}
+  #stepper li{display:contents}
+  #stepper a,.manual{flex-direction:column;justify-content:center;gap:.15rem;min-height:56px;padding:.3rem .2rem;text-align:center;font-size:.72rem}
+  #stepper small{display:none} #stepper b{font-size:.74rem;line-height:1.15}
+  #stepper .n{width:26px;height:26px;font-size:.8rem}
+  .manual{margin:0;border:1px solid transparent;border-radius:8px;display:flex}
+  .card{padding:.9rem .8rem}
+  .up-grid{grid-template-columns:minmax(0,1fr)} .example img{max-height:120px}
+  .row{flex-direction:column;align-items:stretch} .row>*{width:100%} #sec-manual label.f:not(.cardf){grid-template-columns:1fr}
+  .rec-body{flex-direction:column;align-items:flex-start} .rec h3{font-size:1.1rem}
+  .tools{flex-direction:column;align-items:stretch} .seg{display:flex} .seg button{flex:1} .tools input[type=search]{flex:none;width:100%}
+  input,select,button{font-size:16px}
+  #advise,#f button.primary{width:100%}
+  #wrap{max-height:none!important;overflow:visible!important;border:0!important;background:none}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+a.hub{display:block;margin-top:.15rem;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.04em;color:var(--gold);text-decoration:none}a.hub:hover{text-decoration:underline}
+</style></head><body>
+<a class="skip" href="#main">Skip to the main content</a>
+<header class="top">
+  <div class="brand"><img class="noah" src="icons/ui/noah.png?v=202611020256" alt="Noah" width="40" height="40"><div><h1>SOULS Artifact Advisor</h1><a class="hub" href="../">All apps</a></div></div>
+  <div class="hr"><button type="button" class="plbtn" id="prioBtn" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></svg><span>Priority List</span></button>
+  <div class="modesw" id="modeSw" role="radiogroup" aria-label="Input mode"><button type="button" role="radio" id="modeShot" data-mode="screenshot" aria-checked="true" tabindex="0"><span aria-hidden="true">▣</span> Screenshot</button><button type="button" role="radio" id="modeManual" data-mode="manual" aria-checked="false" tabindex="-1"><span aria-hidden="true">✎</span> Manual</button></div></div>
+<script>(function(){var m=document.documentElement.getAttribute("data-mode"),b=document.querySelectorAll("#modeSw [role=radio]");for(var i=0;i<b.length;i++){var on=b[i].getAttribute("data-mode")===m;b[i].setAttribute("aria-checked",on);b[i].tabIndex=on?0:-1}})()</script>
+</header>
+<div class="layout">
+<aside class="side">
+  <nav id="stepper" aria-label="Steps">
+    <ol>
+      <li><a href="#sec-upload" data-step="1"><span class="n"><span>1</span></span><span><b>Upload screenshots</b><small>Add your screenshots</small></span></a></li>
+      <li><a href="#sec-check" data-step="2"><span class="n"><span>2</span></span><span><b>Check artifacts</b><small>Fix anything that is wrong</small></span></a></li>
+      <li><a href="#sec-advice" data-step="3"><span class="n"><span>3</span></span><span><b>Get advice</b><small>See your next step</small></span></a></li>
+    </ol>
+  </nav>
+  <section id="howto" aria-label="How to use"><b>How to use</b>
+<ol>
+<li>Upload your Artifact inventory (Primal, Mythic, and Legendary).</li>
+<li>Overlap is fine, you may check later.</li>
+<li>Enter your Dimensional Essences.</li>
+<li>Tap Get advice to see your next step.</li>
+</ol></section>
+</aside>
+<main id="main">
+<div class="cols">
+<div class="colA">
+
+<section class="card" id="sec-upload" aria-labelledby="h-upload">
+  <div class="card-h"><span class="num" aria-hidden="true">1</span><div><h2 id="h-upload">Upload screenshots</h2><p class="muted">Use screenshots of your Artifact inventory.</p></div></div>
+  <div class="up-grid">
+    <label class="drop" id="drop" for="files">
+      <input id="files" class="sr" type="file" accept="image/*" multiple>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>
+      <b>Drag and drop your screenshots here</b>
+      <small>or</small>
+      <span class="btn primary">Select images</span>
+      <small>PNG, JPG or WEBP. You can pick several at once.</small>
+    </label>
+    <figure class="example">
+      <figcaption>Example screenshot</figcaption>
+      <img src="icons/ui/example.png?v=202611020256" alt="Example of the Artifact inventory screen" width="420" height="411">
+      <p class="tip"><b>Tip:</b> Open your Inventory and tap the Artifact tab, so every artifact shows its number and Transcendence.</p>
+    </figure>
+  </div>
+  <p class="priv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Runs in your browser. Screenshots are not uploaded.</span></p>
+  <div id="picked" hidden>
+    <div class="picked-h"><b id="pickedCount"></b><button class="link" id="clearAll" type="button">Clear all</button></div>
+    <ul id="thumbs"></ul>
+  </div>
+  <div class="row"><button class="primary" id="read" type="button">Read screenshots</button></div>
+  <div id="status" class="muted" role="status"></div>
+  <div id="notes"></div>
+</section>
+
+<section class="card" id="sec-check" aria-labelledby="h-check">
+  <div class="card-h"><span class="num" aria-hidden="true">2</span><div><h2 id="h-check">Check artifacts</h2><p class="muted">Fix anything that is wrong. Orange rows need a check.</p></div></div>
+  <div id="summary" class="muted">Your artifacts will show up here after you read your screenshots.</div>
+  <div id="chips" hidden>
+    <div class="chip" data-k="total"><b>0</b><span>Artifacts found</span></div>
+    <div class="chip" data-k="check"><b>0</b><span>Need a check</span></div>
+    <div class="chip" data-k="ignored" title="Lower-rarity artifacts, which your list does not need"><b>0</b><span>Ignored</span></div>
+  </div>
+  <div id="totals" hidden></div>
+  <div class="tools" id="tools">
+    <input id="search" type="search" placeholder="Search artifacts" aria-label="Search your artifacts" autocomplete="off" hidden>
+    <div class="seg" id="seg" role="group" aria-label="Show" hidden>
+      <button type="button" id="fAll" aria-pressed="true">All</button><button type="button" id="fCheck" aria-pressed="false">Needs check</button>
+    </div>
+    <button class="sec" type="button" id="addItem">+ Add an artifact I missed</button>
+  </div>
+  <div id="addPanel" class="row" hidden><input id="addName" list="artList" placeholder="Type an artifact name" aria-label="Artifact name" autocomplete="off"><button class="primary" id="addGo" type="button">Add</button></div><datalist id="artList"></datalist><div id="addMsg" role="status"></div>
+  <div id="wrap" hidden tabindex="0" role="region" aria-label="Your artifacts list"><table id="items" hidden><thead><tr><th><span class="sr">From your screenshot</span></th><th>Artifact</th><th>Number shown</th><th>Transcendence <span class="dm" aria-hidden="true">◆</span></th><th>Copies</th><th>Check</th><th><span class="sr">Remove</span></th></tr></thead><tbody></tbody></table></div>
+  <div id="rowmsg" role="alert"></div>
+  <div id="showing" class="muted"></div>
+  <div id="checkNext" hidden><span id="checkNextMsg"></span><button class="primary" id="goAdvice" type="button">Get advice <span class="arr" aria-hidden="true">→</span></button></div>
+</section>
+</div>
+
+<div class="colB">
+<section class="card" id="sec-advice" aria-labelledby="h-advice">
+  <div class="card-h"><span class="num" aria-hidden="true">3</span><div><h2 id="h-advice">Get advice</h2><p class="muted">Your best next step, from your artifacts and Dimensional Essences.</p></div></div>
+  <div class="opts">
+    <label class="field"><span class="lab"><img class="ai" src="icons/ui/dimensional-essence.png?v=202611020256" alt="" width="22" height="25" style="width:22px;height:25px;border-radius:0">Dimensional Essences</span><input id="essence" type="text" inputmode="numeric" autocomplete="off" value="0"></label>
+    <label class="check"><input type="checkbox" id="pvp"> I play PvP (PvP-Focus artifacts first)</label>
+  </div>
+  <button class="primary" id="advise" type="button">Get advice</button>
+  <div id="out" aria-live="polite"><p class="empty">Your advice will show up here.</p></div>
+  <details id="detailsBox" class="sub" hidden><summary aria-expanded="false">See every artifact on the list</summary><div id="details" class="muted"></div></details>
+  <details id="how" class="sub"><summary aria-expanded="false">How this works</summary><ul id="howList"></ul></details>
+</section>
+</div>
+</div>
+
+<details class="card" id="sec-manual" open>
+  <summary aria-expanded="true">Enter your artifacts</summary>
+  <form id="f">
+  <fieldset><legend>Dimensional Essences</legend>
+  <label class="field"><span class="lab"><img class="ai" src="icons/ui/dimensional-essence.png?v=202611020256" alt="" width="22" height="25" style="width:22px;height:25px;border-radius:0">Dimensional Essences you have</span><input id="essence2" type="text" inputmode="numeric" autocomplete="off" value="0"></label></fieldset>
+  <details class="sub grp" id="grpMythic" open><summary aria-expanded="true">Mythic artifacts you own</summary><div id="mythics"></div></details>
+  <details class="sub grp" id="grpLegend" open><summary aria-expanded="true">Legendary copies you have</summary><p class="muted gnote">1◆ = 2 copies, 2◆ = 2 copies + 2 Faded Artifacts, 3◆ = 4 copies + 2 Faded Artifacts. Faded Artifacts are not counted.</p><div id="legs"></div></details>
+  <label class="check"><input type="checkbox" id="pvp2"> I play PvP (PvP-Focus artifacts first)</label>
+  <button class="primary" type="submit">Get advice</button></form>
+  <div id="out2" aria-live="polite"><p class="empty">Your advice will show up here.</p></div>
+</details>
+</main>
+</div>
+<dialog id="prioDlg" aria-labelledby="prioTitle"><div class="dlg-h"><div><h2 id="prioTitle">Priority List</h2><p class="muted">A view-only guide to the whole list, in order. It is my opinion, not a must-follow list.</p></div><button type="button" class="dlg-x" id="prioClose" aria-label="Close"><svg class="xi" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div id="prioBody" class="dlg-b" tabindex="0"></div></dialog>
+<button type="button" class="totop" id="toTop" aria-label="Back to top" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 15 7-7 7 7"/></svg></button>
+<script src="src/advisor.js?v=202611020256"></script><script src="src/vision.js?v=202611020256"></script><script src="src/share.js?v=202611020256"></script><script src="src/app.js?v=202611020256"></script>
+</body></html>

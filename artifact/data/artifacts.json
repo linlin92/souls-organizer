@@ -1,0 +1,740 @@
+[
+ {
+  "id": "primal-01",
+  "name": "Staff of Bloodlord",
+  "rarity": "Primal",
+  "ingredients": [
+   {
+    "id": "mythic-11",
+    "qty": 1
+   },
+   {
+    "id": "legendary-22",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Tanker"
+ },
+ {
+  "id": "primal-02",
+  "name": "Mace of Judgment",
+  "rarity": "Primal",
+  "ingredients": [
+   {
+    "id": "mythic-03",
+    "qty": 1
+   },
+   {
+    "id": "legendary-12",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Neutral"
+ },
+ {
+  "id": "mythic-01",
+  "name": "Oblivion",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-11",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Neutral"
+ },
+ {
+  "id": "mythic-02",
+  "name": "Shield of Earth",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-05",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Tanker"
+ },
+ {
+  "id": "mythic-03",
+  "name": "Mace of Judgment",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-12",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Neutral"
+ },
+ {
+  "id": "mythic-04",
+  "name": "Evidence of Miracle",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-18",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Neutral"
+ },
+ {
+  "id": "mythic-05",
+  "name": "Demonic Beast Fang",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-07",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "mythic-06",
+  "name": "Orb of Priests",
+  "aliases": [
+   "Orb of Priest"
+  ],
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-04",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ },
+ {
+  "id": "mythic-07",
+  "name": "Reaping Scythe",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-06",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Healer"
+ },
+ {
+  "id": "mythic-08",
+  "name": "Golden Ornament Cloak",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-01",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Neutral"
+ },
+ {
+  "id": "mythic-09",
+  "name": "Serpent's Emblem",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-31",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ },
+ {
+  "id": "mythic-10",
+  "name": "Mask of Madness",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-27",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Healer"
+ },
+ {
+  "id": "mythic-11",
+  "name": "Staff of Bloodlord",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-22",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Tanker"
+ },
+ {
+  "id": "mythic-12",
+  "name": "Branch of Beginnings",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-29",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Healer"
+ },
+ {
+  "id": "mythic-13",
+  "name": "Helmet of Silence",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-26",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Tanker"
+ },
+ {
+  "id": "mythic-14",
+  "name": "Eternal Pain",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-25",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "mythic-15",
+  "name": "Tome of the Sun",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-21",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "mythic-16",
+  "name": "Death",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-02",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "mythic-17",
+  "name": "Turbulence Lamp of Wrath",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-19",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ },
+ {
+  "id": "mythic-18",
+  "name": "Eternal Bond",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-08",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Tanker"
+ },
+ {
+  "id": "mythic-19",
+  "name": "Paladin Cuirass",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-26",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Tanker"
+ },
+ {
+  "id": "mythic-20",
+  "name": "Noble's Pocket Watch",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-16",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ },
+ {
+  "id": "mythic-21",
+  "name": "Sacred Emblem",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-22",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Tanker"
+ },
+ {
+  "id": "mythic-22",
+  "name": "Cursed Chalice",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-06",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Healer"
+ },
+ {
+  "id": "mythic-23",
+  "name": "Harmony",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-03",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Healer"
+ },
+ {
+  "id": "mythic-24",
+  "name": "Warrior's Axe",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-09",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "mythic-25",
+  "name": "Circlet of Amplification",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-04",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ },
+ {
+  "id": "mythic-26",
+  "name": "Nightmare",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-14",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "mythic-27",
+  "name": "Codex of Flame Rites Vol. 3: Serenity",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-18",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Neutral"
+ },
+ {
+  "id": "mythic-28",
+  "name": "Giant's Boomerang",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-10",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "mythic-29",
+  "name": "Steel Bishop",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-15",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Healer"
+ },
+ {
+  "id": "mythic-30",
+  "name": "Gloves of Resonance",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-13",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ },
+ {
+  "id": "mythic-31",
+  "name": "Codex of Flame Rites Vol. 1: Fervor",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-18",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Neutral"
+ },
+ {
+  "id": "mythic-32",
+  "name": "Scale of Balance",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-32",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Healer"
+ },
+ {
+  "id": "mythic-33",
+  "name": "Abyssal Jewel",
+  "rarity": "Mythic",
+  "ingredients": [
+   {
+    "id": "legendary-33",
+    "qty": 4
+   }
+  ],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ },
+ {
+  "id": "mythic-34",
+  "name": "Primal Claw",
+  "rarity": "Mythic",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "mythic-35",
+  "name": "World Tree Branch",
+  "rarity": "Mythic",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ },
+ {
+  "id": "legendary-01",
+  "name": "Sword of the Monster Hunter",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Neutral"
+ },
+ {
+  "id": "legendary-02",
+  "name": "Earrings of Tranquility",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "legendary-03",
+  "name": "Tome of Regeneration",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Healer"
+ },
+ {
+  "id": "legendary-04",
+  "name": "Soul Sand",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ },
+ {
+  "id": "legendary-05",
+  "name": "Shield of the Guardian",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Tanker"
+ },
+ {
+  "id": "legendary-06",
+  "name": "Staff of Infinite Vitality",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Healer"
+ },
+ {
+  "id": "legendary-07",
+  "name": "Grip of Hell",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "legendary-08",
+  "name": "Emblem of Continuance",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Tanker"
+ },
+ {
+  "id": "legendary-09",
+  "name": "Oath of the Past",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "legendary-10",
+  "name": "Executioner's Axe",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "legendary-11",
+  "name": "Madness Talisman",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Neutral"
+ },
+ {
+  "id": "legendary-12",
+  "name": "Book of Forbidden Knowledge",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Neutral"
+ },
+ {
+  "id": "legendary-13",
+  "name": "Ancient Inscription Tablet",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ },
+ {
+  "id": "legendary-14",
+  "name": "Blacksmith's Hammer",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "legendary-15",
+  "name": "Fortune Coin",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Healer"
+ },
+ {
+  "id": "legendary-16",
+  "name": "Mysterious Patterned Leaf",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ },
+ {
+  "id": "legendary-18",
+  "name": "Essence of Burning Flame",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Neutral"
+ },
+ {
+  "id": "legendary-19",
+  "name": "Rider's Horn",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ },
+ {
+  "id": "legendary-20",
+  "name": "Crown of Fire",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": true,
+  "class": "Dealer"
+ },
+ {
+  "id": "legendary-21",
+  "name": "Spear of the Monster Hunter",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "legendary-22",
+  "name": "Steel Beast's Bone",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Tanker"
+ },
+ {
+  "id": "legendary-23",
+  "name": "Gold Earrings",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": true,
+  "class": "Neutral"
+ },
+ {
+  "id": "legendary-24",
+  "name": "Guide's Vambrace",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": true,
+  "class": "Tanker"
+ },
+ {
+  "id": "legendary-25",
+  "name": "Demonic Ring",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Dealer"
+ },
+ {
+  "id": "legendary-26",
+  "name": "Relentless Knight's Helmet",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Tanker"
+ },
+ {
+  "id": "legendary-27",
+  "name": "Crystal of Eternal Healing",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Healer"
+ },
+ {
+  "id": "legendary-28",
+  "name": "Mace of Punishment",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": true,
+  "class": "Healer"
+ },
+ {
+  "id": "legendary-29",
+  "name": "Guardian of the Sage",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Healer"
+ },
+ {
+  "id": "legendary-30",
+  "name": "Cursed Sword",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": true,
+  "class": "Supporter"
+ },
+ {
+  "id": "legendary-31",
+  "name": "Dragon Hide Shield",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ },
+ {
+  "id": "legendary-32",
+  "name": "Key of Dawn",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Healer"
+ },
+ {
+  "id": "legendary-33",
+  "name": "Oath of Sacrifice",
+  "rarity": "Legendary",
+  "ingredients": [],
+  "notAMythicMaterial": false,
+  "class": "Supporter"
+ }
+]

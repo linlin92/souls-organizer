@@ -1,0 +1,310 @@
+{
+ "craftCost": 2000,
+ "maxLevel": 50,
+ "notes": "Priority list from Yustian (2026-10-31, fourth version, replaces all earlier tiers). 'need' is the CUMULATIVE total owned (Lamp 1 in tier 1, 2 in tier 2, 3 in tier 4). Tiers are walked in order; within a tier the list order is the suggestion order. Tier 1 Basic, tier 2 Intermediate, tier 3 Advanced (+ items marked optional, which never block and are crafted only once the rest of the tier is owned), tier 4 the PvP-Focus and PvE-Focus groups (shown to everyone; the group of the player's focus goes first: PvP group first when 'I play PvP' is ticked, PvE group first when it is not; the 2nd Helmet of Silence and 2nd Scale of Balance are in the PvP-Focus group), tier 5 Late (unlocked at ~90% of tiers 3+4). 'never' items (Codex Vol. 3 Serenity, Oblivion, Primal Claw, Staff of Bloodlord) are never suggested and are shown as the 'Don't craft' group; 'caution' items (Primal Mace of Judgment, Primal Staff of Bloodlord, World Tree Branch) are never suggested but get a note and are shown as 'Consider very carefully'. Evidence of Miracle (1st and 2nd) and Fervor need at least 6 spare (not equipped) Essence of Burning Flame copies (3 diamonds = 4, fodder not counted); 6-8 is fine, ideally 8. Fervor needs Evidence of Miracle owned. Every recommended artifact must be fully maxed (lv50); never half-upgrade.",
+ "tiers": [
+  {
+   "tier": 1,
+   "name": "Basic",
+   "items": [
+    {
+     "id": "mythic-16",
+     "need": 1,
+     "short": "Death"
+    },
+    {
+     "id": "mythic-05",
+     "need": 1,
+     "short": "Demonic Beast Fang"
+    },
+    {
+     "id": "mythic-17",
+     "need": 1,
+     "short": "Turbulence Lamp of Wrath"
+    },
+    {
+     "id": "mythic-03",
+     "need": 1,
+     "short": "Mace of Judgment"
+    },
+    {
+     "id": "mythic-09",
+     "need": 1,
+     "short": "Serpent's Emblem"
+    },
+    {
+     "id": "mythic-19",
+     "need": 1,
+     "short": "Paladin Cuirass"
+    }
+   ]
+  },
+  {
+   "tier": 2,
+   "name": "Intermediate",
+   "items": [
+    {
+     "id": "mythic-16",
+     "need": 2,
+     "short": "Death"
+    },
+    {
+     "id": "mythic-17",
+     "need": 2,
+     "short": "Turbulence Lamp of Wrath"
+    },
+    {
+     "id": "mythic-04",
+     "need": 1,
+     "short": "Evidence of Miracle",
+     "spareFlames": {
+      "min": 6,
+      "ideal": 8
+     }
+    },
+    {
+     "id": "mythic-22",
+     "need": 1,
+     "short": "Cursed Chalice"
+    },
+    {
+     "id": "mythic-10",
+     "need": 1,
+     "short": "Mask of Madness"
+    },
+    {
+     "id": "mythic-33",
+     "need": 1,
+     "short": "Abyssal Jewel"
+    },
+    {
+     "id": "mythic-32",
+     "need": 1,
+     "short": "Scale of Balance"
+    },
+    {
+     "id": "mythic-29",
+     "need": 1,
+     "short": "Steel Bishop"
+    }
+   ]
+  },
+  {
+   "tier": 3,
+   "name": "Advanced",
+   "items": [
+    {
+     "id": "mythic-30",
+     "need": 1,
+     "short": "Gloves of Resonance"
+    },
+    {
+     "id": "mythic-20",
+     "need": 1,
+     "short": "Noble's Pocket Watch"
+    },
+    {
+     "id": "mythic-31",
+     "need": 1,
+     "short": "Fervor",
+     "requires": {
+      "mythic-04": 1
+     },
+     "spareFlames": {
+      "min": 6,
+      "ideal": 8
+     }
+    },
+    {
+     "id": "mythic-03",
+     "need": 2,
+     "short": "Mace of Judgment",
+     "optional": "optional for advanced players, never holds anything up"
+    },
+    {
+     "id": "mythic-05",
+     "need": 2,
+     "short": "Demonic Beast Fang",
+     "optional": "optional for advanced players, never holds anything up"
+    },
+    {
+     "id": "mythic-02",
+     "need": 1,
+     "short": "Shield of Earth",
+     "optional": "optional for advanced players, never holds anything up"
+    },
+    {
+     "id": "mythic-08",
+     "need": 1,
+     "short": "Golden Ornament Cloak",
+     "optional": "optional for advanced players, never holds anything up"
+    }
+   ]
+  },
+  {
+   "tier": 4,
+   "name": "PvP-Focus or PvE-Focus",
+   "items": [
+    {
+     "id": "mythic-23",
+     "need": 1,
+     "short": "Harmony",
+     "focus": "pvp"
+    },
+    {
+     "id": "mythic-15",
+     "need": 1,
+     "short": "Tome of the Sun",
+     "focus": "pvp"
+    },
+    {
+     "id": "mythic-13",
+     "need": 1,
+     "short": "Helmet of Silence",
+     "focus": "pvp"
+    },
+    {
+     "id": "mythic-06",
+     "need": 1,
+     "short": "Orb of Priests",
+     "focus": "pvp"
+    },
+    {
+     "id": "mythic-21",
+     "need": 1,
+     "short": "Sacred Emblem",
+     "focus": "pvp"
+    },
+    {
+     "id": "mythic-26",
+     "need": 1,
+     "short": "Nightmare",
+     "focus": "pvp"
+    },
+    {
+     "id": "mythic-13",
+     "need": 2,
+     "short": "Helmet of Silence",
+     "focus": "pvp"
+    },
+    {
+     "id": "mythic-32",
+     "need": 2,
+     "short": "Scale of Balance",
+     "focus": "pvp"
+    },
+    {
+     "id": "mythic-28",
+     "need": 1,
+     "short": "Giant's Boomerang",
+     "focus": "pvp"
+    },
+    {
+     "id": "mythic-04",
+     "need": 2,
+     "short": "Evidence of Miracle",
+     "focus": "pve",
+     "spareFlames": {
+      "min": 6,
+      "ideal": 8
+     }
+    },
+    {
+     "id": "mythic-17",
+     "need": 3,
+     "short": "Turbulence Lamp of Wrath",
+     "focus": "pve"
+    },
+    {
+     "id": "mythic-09",
+     "need": 2,
+     "short": "Serpent's Emblem",
+     "focus": "pve"
+    }
+   ]
+  },
+  {
+   "tier": 5,
+   "name": "Late",
+   "late": true,
+   "items": [
+    {
+     "id": "mythic-07",
+     "need": 1,
+     "short": "Reaping Scythe"
+    },
+    {
+     "id": "mythic-14",
+     "need": 1,
+     "short": "Eternal Pain"
+    },
+    {
+     "id": "mythic-24",
+     "need": 1,
+     "short": "Warrior's Axe"
+    },
+    {
+     "id": "mythic-25",
+     "need": 1,
+     "short": "Circlet of Amplification"
+    },
+    {
+     "id": "mythic-18",
+     "need": 1,
+     "short": "Eternal Bond"
+    },
+    {
+     "id": "mythic-12",
+     "need": 1,
+     "short": "Branch of Beginnings"
+    }
+   ]
+  }
+ ],
+ "late": {
+  "unlockAfterTiers": [
+   3,
+   4
+  ],
+  "fraction": 0.9,
+  "note": "Tier 5 (Late) is only suggested once about 90% of the non-optional items of tiers 3 and 4 (Advanced and the PvP/PvE-Focus groups) are owned."
+ },
+ "never": [
+  {
+   "id": "mythic-27",
+   "name": "Codex of Flame Rites Vol. 3: Serenity"
+  },
+  {
+   "id": "mythic-01",
+   "name": "Oblivion"
+  },
+  {
+   "id": "mythic-34",
+   "name": "Primal Claw"
+  },
+  {
+   "id": "mythic-11",
+   "name": "Staff of Bloodlord"
+  }
+ ],
+ "caution": [
+  {
+   "id": "primal-02",
+   "name": "Primal Mace of Judgment"
+  },
+  {
+   "id": "primal-01",
+   "name": "Primal Staff of Bloodlord"
+  },
+  {
+   "id": "mythic-35",
+   "name": "World Tree Branch"
+  }
+ ],
+ "extraCopiesOk": [
+  "mythic-16",
+  "mythic-17",
+  "mythic-05"
+ ],
+ "extraCopiesNote": "Extra copies (2nd, 3rd) are only suggested for Turbulence Lamp of Wrath, Death and Demonic Beast Fang. For every other artifact they wait until no useful first copy is left."
+}

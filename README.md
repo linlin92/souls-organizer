@@ -1,4 +1,10 @@
-# SOULS Organizer (local prototype, v1: Equipment)
+# SOULS Organizer
+
+Live site: https://linlin92.github.io/souls-organizer/
+
+The pages at the root of this repo are the Gear advisor. The live site is the hub in `hub/`, with Gear, the Artifact advisor, and a Runes placeholder. GitHub Pages builds that hub and decodes the artifact icons.
+
+# Gear advisor (v1: Equipment)
 
 Upload Inventory screenshots (Equipment tab) and get an expandable recap of your gear, plus a share image for Discord.
 Runs fully in the browser (no server code, no AI API, nothing uploaded). Same dark gold theme as the SOULS Artifact Advisor.

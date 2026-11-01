@@ -1,0 +1,41 @@
+name: Publish the site
+on:
+  push:
+    branches: [master, main]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assemble the hub
+        run: |
+          mkdir -p public/artifact/icons public/artifact/icons-old public/artifact/icons/ui public/artifact/fonts public/gear public/runes
+          cp hub/index.html public/index.html
+          cp hub/logo.png public/logo.png
+          cp runes/index.html public/runes/index.html
+          cp artifact/index.html public/artifact/index.html
+          cp -r artifact/src artifact/data public/artifact/
+          cp gear/index.html public/gear/index.html
+          cp -r gear/src gear/data gear/icons gear/fonts public/gear/
+          for f in artifact/icons/*.png artifact/icons-old/*.png artifact/icons/ui/*.png artifact/fonts/*.woff2; do
+            base64 -d "$f" > "public/$f"
+          done
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

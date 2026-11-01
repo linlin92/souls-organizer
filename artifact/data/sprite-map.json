@@ -1,0 +1,628 @@
+{
+ "note": "Mapping of the 70 sprites in Yustian's zip to artifact ids (found by masked template matching against the first icon set at 2x scale), and where each sprite sits in the 260x260 icon. item_605101 is the Faded Artifact; The zip has no sprite for Adventurer's Chronicle (removed from the artifact list, its old icon is the internal 'ignore' template).",
+ "mapped": {
+  "legendary-24": {
+   "sprite": "Legendary/item_605001.png",
+   "score": 0.851,
+   "scale": 1.96,
+   "xy": [
+    10,
+    8
+   ]
+  },
+  "legendary-22": {
+   "sprite": "Legendary/item_605002.png",
+   "score": 0.897,
+   "scale": 1.96,
+   "xy": [
+    6,
+    15
+   ]
+  },
+  "legendary-26": {
+   "sprite": "Legendary/item_605003.png",
+   "score": 0.966,
+   "scale": 1.94,
+   "xy": [
+    14,
+    17
+   ]
+  },
+  "legendary-20": {
+   "sprite": "Legendary/item_605004.png",
+   "score": 0.959,
+   "scale": 1.94,
+   "xy": [
+    10,
+    8
+   ]
+  },
+  "legendary-21": {
+   "sprite": "Legendary/item_605005.png",
+   "score": 0.966,
+   "scale": 1.94,
+   "xy": [
+    8,
+    12
+   ]
+  },
+  "legendary-25": {
+   "sprite": "Legendary/item_605006.png",
+   "score": 0.863,
+   "scale": 1.96,
+   "xy": [
+    28,
+    7
+   ]
+  },
+  "legendary-28": {
+   "sprite": "Legendary/item_605007.png",
+   "score": 0.97,
+   "scale": 1.96,
+   "xy": [
+    12,
+    9
+   ]
+  },
+  "legendary-27": {
+   "sprite": "Legendary/item_605008.png",
+   "score": 0.978,
+   "scale": 1.94,
+   "xy": [
+    8,
+    8
+   ]
+  },
+  "legendary-29": {
+   "sprite": "Legendary/item_605009.png",
+   "score": 0.943,
+   "scale": 1.94,
+   "xy": [
+    8,
+    8
+   ]
+  },
+  "legendary-30": {
+   "sprite": "Legendary/item_605010.png",
+   "score": 0.977,
+   "scale": 1.96,
+   "xy": [
+    10,
+    7
+   ]
+  },
+  "legendary-31": {
+   "sprite": "Legendary/item_605011.png",
+   "score": 0.928,
+   "scale": 1.94,
+   "xy": [
+    8,
+    8
+   ]
+  },
+  "legendary-19": {
+   "sprite": "Legendary/item_605012.png",
+   "score": 0.902,
+   "scale": 1.94,
+   "xy": [
+    8,
+    27
+   ]
+  },
+  "legendary-23": {
+   "sprite": "Legendary/item_605013.png",
+   "score": 0.964,
+   "scale": 1.94,
+   "xy": [
+    37,
+    8
+   ]
+  },
+  "legendary-18": {
+   "sprite": "Legendary/item_605014.png",
+   "score": 0.98,
+   "scale": 1.96,
+   "xy": [
+    7,
+    12
+   ]
+  },
+  "legendary-12": {
+   "sprite": "Legendary/item_605015.png",
+   "score": 0.967,
+   "scale": 1.94,
+   "xy": [
+    8,
+    8
+   ]
+  },
+  "legendary-05": {
+   "sprite": "Legendary/item_605016.png",
+   "score": 0.909,
+   "scale": 1.94,
+   "xy": [
+    14,
+    8
+   ]
+  },
+  "legendary-07": {
+   "sprite": "Legendary/item_605017.png",
+   "score": 0.754,
+   "scale": 1.94,
+   "xy": [
+    14,
+    8
+   ]
+  },
+  "legendary-06": {
+   "sprite": "Legendary/item_605018.png",
+   "score": 0.978,
+   "scale": 1.94,
+   "xy": [
+    10,
+    8
+   ]
+  },
+  "legendary-04": {
+   "sprite": "Legendary/item_605019.png",
+   "score": 0.824,
+   "scale": 1.96,
+   "xy": [
+    16,
+    6
+   ]
+  },
+  "legendary-01": {
+   "sprite": "Legendary/item_605020.png",
+   "score": 0.97,
+   "scale": 1.94,
+   "xy": [
+    16,
+    12
+   ]
+  },
+  "legendary-02": {
+   "sprite": "Legendary/item_605021.png",
+   "score": 0.962,
+   "scale": 1.94,
+   "xy": [
+    39,
+    12
+   ]
+  },
+  "legendary-03": {
+   "sprite": "Legendary/item_605022.png",
+   "score": 0.968,
+   "scale": 1.96,
+   "xy": [
+    14,
+    15
+   ]
+  },
+  "legendary-08": {
+   "sprite": "Legendary/item_605023.png",
+   "score": 0.956,
+   "scale": 1.94,
+   "xy": [
+    16,
+    17
+   ]
+  },
+  "legendary-13": {
+   "sprite": "Legendary/item_605024.png",
+   "score": 0.954,
+   "scale": 1.96,
+   "xy": [
+    20,
+    7
+   ]
+  },
+  "legendary-10": {
+   "sprite": "Legendary/item_605025.png",
+   "score": 0.973,
+   "scale": 1.94,
+   "xy": [
+    10,
+    13
+   ]
+  },
+  "legendary-15": {
+   "sprite": "Legendary/item_605026.png",
+   "score": 0.933,
+   "scale": 1.94,
+   "xy": [
+    10,
+    25
+   ]
+  },
+  "legendary-16": {
+   "sprite": "Legendary/item_605027.png",
+   "score": 0.946,
+   "scale": 1.94,
+   "xy": [
+    19,
+    16
+   ]
+  },
+  "legendary-14": {
+   "sprite": "Legendary/item_605028.png",
+   "score": 0.957,
+   "scale": 1.94,
+   "xy": [
+    29,
+    17
+   ]
+  },
+  "legendary-09": {
+   "sprite": "Legendary/item_605029.png",
+   "score": 0.923,
+   "scale": 1.94,
+   "xy": [
+    29,
+    25
+   ]
+  },
+  "legendary-11": {
+   "sprite": "Legendary/item_605030.png",
+   "score": 0.963,
+   "scale": 1.94,
+   "xy": [
+    17,
+    21
+   ]
+  },
+  "legendary-32": {
+   "sprite": "Mythics/item_605031.png",
+   "score": 0.936,
+   "scale": 1.96,
+   "xy": [
+    7,
+    6
+   ]
+  },
+  "legendary-33": {
+   "sprite": "Mythics/item_605032.png",
+   "score": 0.933,
+   "scale": 1.96,
+   "xy": [
+    18,
+    20
+   ]
+  },
+  "mythic-11": {
+   "sprite": "Mythics/item_606001.png",
+   "score": 0.926,
+   "scale": 1.94,
+   "xy": [
+    27,
+    23
+   ]
+  },
+  "mythic-13": {
+   "sprite": "Mythics/item_606002.png",
+   "score": 0.884,
+   "scale": 1.94,
+   "xy": [
+    12,
+    10
+   ]
+  },
+  "mythic-15": {
+   "sprite": "Mythics/item_606003.png",
+   "score": 0.943,
+   "scale": 1.94,
+   "xy": [
+    12,
+    8
+   ]
+  },
+  "mythic-14": {
+   "sprite": "Mythics/item_606004.png",
+   "score": 0.933,
+   "scale": 1.94,
+   "xy": [
+    33,
+    21
+   ]
+  },
+  "mythic-10": {
+   "sprite": "Mythics/item_606005.png",
+   "score": 0.925,
+   "scale": 1.94,
+   "xy": [
+    18,
+    31
+   ]
+  },
+  "mythic-12": {
+   "sprite": "Mythics/item_606006.png",
+   "score": 0.923,
+   "scale": 1.94,
+   "xy": [
+    8,
+    8
+   ]
+  },
+  "mythic-09": {
+   "sprite": "Mythics/item_606007.png",
+   "score": 0.94,
+   "scale": 1.96,
+   "xy": [
+    20,
+    18
+   ]
+  },
+  "mythic-17": {
+   "sprite": "Mythics/item_606008.png",
+   "score": 0.867,
+   "scale": 1.94,
+   "xy": [
+    12,
+    8
+   ]
+  },
+  "mythic-04": {
+   "sprite": "Mythics/item_606009.png",
+   "score": 0.953,
+   "scale": 1.96,
+   "xy": [
+    10,
+    16
+   ]
+  },
+  "mythic-03": {
+   "sprite": "Mythics/item_606010.png",
+   "score": 0.971,
+   "scale": 1.94,
+   "xy": [
+    12,
+    15
+   ]
+  },
+  "mythic-02": {
+   "sprite": "Mythics/item_606011.png",
+   "score": 0.954,
+   "scale": 1.94,
+   "xy": [
+    18,
+    19
+   ]
+  },
+  "mythic-05": {
+   "sprite": "Mythics/item_606012.png",
+   "score": 0.959,
+   "scale": 1.94,
+   "xy": [
+    8,
+    8
+   ]
+  },
+  "mythic-07": {
+   "sprite": "Mythics/item_606013.png",
+   "score": 0.931,
+   "scale": 1.94,
+   "xy": [
+    14,
+    25
+   ]
+  },
+  "mythic-06": {
+   "sprite": "Mythics/item_606014.png",
+   "score": 0.971,
+   "scale": 1.94,
+   "xy": [
+    8,
+    8
+   ]
+  },
+  "mythic-08": {
+   "sprite": "Mythics/item_606015.png",
+   "score": 0.972,
+   "scale": 1.94,
+   "xy": [
+    33,
+    10
+   ]
+  },
+  "mythic-16": {
+   "sprite": "Mythics/item_606016.png",
+   "score": 0.859,
+   "scale": 1.94,
+   "xy": [
+    8,
+    10
+   ]
+  },
+  "mythic-23": {
+   "sprite": "Mythics/item_606017.png",
+   "score": 0.961,
+   "scale": 1.96,
+   "xy": [
+    24,
+    7
+   ]
+  },
+  "mythic-18": {
+   "sprite": "Mythics/item_606018.png",
+   "score": 0.969,
+   "scale": 1.96,
+   "xy": [
+    12,
+    18
+   ]
+  },
+  "mythic-30": {
+   "sprite": "Mythics/item_606019.png",
+   "score": 0.955,
+   "scale": 1.94,
+   "xy": [
+    16,
+    8
+   ]
+  },
+  "mythic-28": {
+   "sprite": "Mythics/item_606020.png",
+   "score": 0.941,
+   "scale": 1.96,
+   "xy": [
+    18,
+    30
+   ]
+  },
+  "mythic-29": {
+   "sprite": "Mythics/item_606021.png",
+   "score": 0.868,
+   "scale": 1.94,
+   "xy": [
+    14,
+    21
+   ]
+  },
+  "mythic-31": {
+   "sprite": "Mythics/item_606022.png",
+   "score": 0.957,
+   "scale": 1.94,
+   "xy": [
+    8,
+    10
+   ]
+  },
+  "mythic-27": {
+   "sprite": "Mythics/item_606023.png",
+   "score": 0.945,
+   "scale": 1.94,
+   "xy": [
+    8,
+    8
+   ]
+  },
+  "mythic-25": {
+   "sprite": "Mythics/item_606024.png",
+   "score": 0.965,
+   "scale": 1.96,
+   "xy": [
+    22,
+    11
+   ]
+  },
+  "mythic-21": {
+   "sprite": "Mythics/item_606025.png",
+   "score": 0.957,
+   "scale": 1.94,
+   "xy": [
+    23,
+    21
+   ]
+  },
+  "mythic-20": {
+   "sprite": "Mythics/item_606026.png",
+   "score": 0.956,
+   "scale": 1.96,
+   "xy": [
+    24,
+    18
+   ]
+  },
+  "mythic-26": {
+   "sprite": "Mythics/item_606027.png",
+   "score": 0.921,
+   "scale": 1.96,
+   "xy": [
+    18,
+    17
+   ]
+  },
+  "mythic-19": {
+   "sprite": "Mythics/item_606028.png",
+   "score": 0.964,
+   "scale": 1.94,
+   "xy": [
+    21,
+    29
+   ]
+  },
+  "mythic-22": {
+   "sprite": "Mythics/item_606029.png",
+   "score": 0.971,
+   "scale": 1.96,
+   "xy": [
+    32,
+    22
+   ]
+  },
+  "mythic-24": {
+   "sprite": "Mythics/item_606030.png",
+   "score": 0.948,
+   "scale": 1.94,
+   "xy": [
+    23,
+    19
+   ]
+  },
+  "mythic-01": {
+   "sprite": "Mythics/item_606031.png",
+   "score": 0.956,
+   "scale": 1.96,
+   "xy": [
+    20,
+    24
+   ]
+  },
+  "mythic-32": {
+   "sprite": "Mythics/item_606032.png",
+   "score": 0.934,
+   "scale": 1.96,
+   "xy": [
+    22,
+    12
+   ]
+  },
+  "mythic-33": {
+   "sprite": "Mythics/item_606033.png",
+   "score": 0.904,
+   "scale": 1.96,
+   "xy": [
+    22,
+    28
+   ]
+  },
+  "mythic-34": {
+   "sprite": "Mythics/item_616001.png",
+   "score": 0.901,
+   "scale": 1.96,
+   "xy": [
+    14,
+    30
+   ]
+  },
+  "mythic-35": {
+   "sprite": "Mythics/item_616002.png",
+   "score": 0.949,
+   "scale": 1.94,
+   "xy": [
+    8,
+    18
+   ]
+  },
+  "primal-01": {
+   "sprite": "Primal/item_607001.png",
+   "score": 0.864,
+   "scale": 1.94,
+   "xy": [
+    22,
+    19
+   ]
+  },
+  "primal-02": {
+   "sprite": "Primal/item_607002.png",
+   "score": 0.952,
+   "scale": 1.94,
+   "xy": [
+    10,
+    13
+   ]
+  }
+ },
+ "noSprite": [],
+ "fadedSprite": "Legendary/item_605101.png"
+}

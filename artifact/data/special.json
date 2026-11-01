@@ -1,0 +1,17 @@
+[
+ {
+  "id": "faded-artifact",
+  "name": "Faded Artifact (fodder)",
+  "rarity": "Legendary",
+  "special": true,
+  "note": "What the 2 any-Legendary fodder of a 2-diamond transcend turn into when it is reset. Never an ingredient of any recipe; only usable as transcend fodder."
+ },
+ {
+  "id": "ignore-adventurers-chronicle",
+  "name": "Adventurer's Chronicle (free item, ignored)",
+  "rarity": "Legendary",
+  "special": true,
+  "ignore": true,
+  "note": "Free Habby item, never used in any crafting (Yustian). Kept only as an internal template so a tile of it is silently skipped: not listed, not flagged, not counted, not fodder."
+ }
+]
