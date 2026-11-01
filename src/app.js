@@ -105,11 +105,16 @@
           analyses.push(an); sources.push(img);
         } catch (e) { notes.push({ cls: "err", text: `I could not use "${name}": ${e.message}.` }); }
       }
-      items = []; ignored = { skipped: 0, partialRows: 0 };
+      items = []; ignored = { skipped: 0, partialRows: 0, legendary: 0 };
       if (!analyses.length) { finish(notes, "Sorry, I could not read any of your screenshots. Please use screenshots of your Equipment inventory.", true); return; }
       const merged = G.merge(analyses);
-      for (const t of merged.tiles) { if (t.partialRow) ignored.partialRows++; else if (t.ignored && !t.cutOff) ignored.skipped++; }
-      for (const t of G.toPieces(merged.tiles)) {
+      for (const t of merged.tiles) {
+        if (t.partialRow) { if (t.mythicCut) ignored.partialRows++; }
+        else if (t.ignored && !t.cutOff) { ignored.skipped++; if (t.rarity === "legendary") ignored.legendary++; }
+      }
+      const picked = G.preferFiltered(analyses, G.toPieces(merged.tiles));
+      if (picked.filtered.length) notes.push({ cls: "muted", text: `${picked.filtered.join(" and ")} ${picked.filtered.length === 1 ? "is" : "are"} taken from the filtered inventory screenshot, so those pieces are counted once.` });
+      for (const t of picked.pieces) {
         const rect = analyses[t.src.shot - 1].rows[t.src.row].cols[t.src.col].rect;
         items.push({
           uid: ++uid, cls: t.cls, set: t.set, slot: t.slot, diamonds: t.diamonds || 0, refinedCount: t.refinedCount || 0, equipped: !!t.equipped,
@@ -117,7 +122,9 @@
         });
       }
       if (ignored.partialRows) notes.push({ cls: "warn", text: `${pl(ignored.partialRows, "row")} ${ignored.partialRows === 1 ? "was" : "were"} cut off in every screenshot it appears in, so ${ignored.partialRows === 1 ? "it was" : "they were"} not read. If a piece is missing, add a screenshot that shows that row in full.` });
-      if (ignored.skipped) notes.push({ cls: "muted", text: `Skipped ${pl(ignored.skipped, "tile")} that ${ignored.skipped === 1 ? "is" : "are"} not yellow (Mythic) or empty.` });
+      if (ignored.legendary) notes.push({ cls: "muted", text: `Skipped ${pl(ignored.legendary, "red Legendary tile")}. Only yellow Mythic gear is read.` });
+      const empty = ignored.skipped - ignored.legendary;
+      if (empty) notes.push({ cls: "muted", text: `Skipped ${pl(empty, "empty tile")}.` });
       if (!items.length) { finish(notes, "Sorry, I found no yellow (Mythic) gear. Is this your Equipment inventory? You can also add pieces by hand.", true); return; }
       items.sort((a, b) => (b.flags.length > 0) - (a.flags.length > 0)); // unsure pieces first (stable: screenshot order otherwise)
       filter = "check";
@@ -132,10 +139,16 @@
   // ---------- Check list ----------
   const CLS = G.CLASS_ORDER, SLOTS = G.SLOTS;
   const opt = (v, label, cur) => `<option value="${v}"${String(v) === String(cur) ? " selected" : ""}>${esc(label)}</option>`;
-  const refKind = (p) => (p.diamonds === 0 ? "none" : G.isRefined(p) ? "refined" : "plain");
+  // Refine level only exists once all 3 diamonds are there: +1 is 1 icy and 2 gold, +2 is 2 icy and 1 gold, +3 is all icy.
+  const refOptions = (p) => {
+    const opts = [["0", "Normal (gold)"]];
+    if (p.diamonds >= 3) opts.push(["1", "Refined +1"], ["2", "Refined +2"], ["3", "Refined +3"]);
+    return opts;
+  };
+  const refValue = (p) => (p.diamonds >= 3 ? String(Math.min(3, p.refinedCount || 0)) : "0");
   function pieceRow(p) {
     const flagged = p.flags.length;
-    const kinds = [["plain", "Normal (gold)"], ["refined", "Refined (platinum)"]];
+    const kinds = refOptions(p);
     return `<li class="pc${flagged ? " flag" : ""}" data-u="${p.uid}">
       ${p.thumb ? `<img class="th" src="${p.thumb}" alt="Tile from your screenshot">` : `<span class="th"></span>`}
       <div>
@@ -144,7 +157,7 @@
           <label>Class<select data-f="cls">${CLS.map((c) => opt(c, c, p.cls)).join("")}</select></label>
           <label>Slot<select data-f="slot">${SLOTS.map((s) => opt(s, G.SLOT_NAME[s], p.slot)).join("")}</select></label>
           <label>Diamonds<select data-f="diamonds">${[0, 1, 2, 3].map((n) => opt(n, n, p.diamonds)).join("")}</select></label>
-          <label>Diamond type<select data-f="ref"${p.diamonds ? "" : " disabled"}>${kinds.map(([v, l]) => opt(v, l, refKind(p) === "none" ? "plain" : refKind(p))).join("")}</select></label>
+          <label>Diamond type<select data-f="ref"${p.diamonds ? "" : " disabled"}>${kinds.map(([v, l]) => opt(v, l, refValue(p))).join("")}</select></label>
           <label class="eq"><input data-f="equipped" type="checkbox"${p.equipped ? " checked" : ""}> Equipped</label>
         </div>
       </div>
@@ -187,10 +200,17 @@
     const f = e.target.dataset.f, p = itemOf(e.target); if (!f || !p) return;
     if (f === "cls") { p.cls = e.target.value; p.set = p.cls.toLowerCase(); }
     else if (f === "slot") p.slot = e.target.value;
-    else if (f === "diamonds") { const was = refKind(p) === "refined"; p.diamonds = +e.target.value; p.refinedCount = was ? p.diamonds : 0; } // refined is always the whole tile
-    else if (f === "ref") p.refinedCount = e.target.value === "refined" ? p.diamonds : 0;
+    else if (f === "diamonds") { p.diamonds = +e.target.value; if (p.diamonds < 3) p.refinedCount = 0; }
+    else if (f === "ref") { p.refinedCount = +e.target.value; if (p.refinedCount > 0) p.diamonds = 3; }
     else if (f === "equipped") p.equipped = e.target.checked;
-    if (f === "diamonds") { const li = e.target.closest("li"); li.querySelector('[data-f="ref"]').disabled = !p.diamonds; li.querySelector('[data-f="ref"]').value = refKind(p) === "none" ? "plain" : refKind(p); }
+    if (f === "diamonds" || f === "ref") {
+      const li = e.target.closest("li");
+      const dsel = li.querySelector('[data-f="diamonds"]'), rsel = li.querySelector('[data-f="ref"]');
+      dsel.value = String(p.diamonds);
+      const cur = refValue(p);
+      rsel.innerHTML = refOptions(p).map(([v, l]) => `<option value="${v}"${v === cur ? " selected" : ""}>${esc(l)}</option>`).join("");
+      rsel.disabled = !p.diamonds;
+    }
     renderRecap(); invalidateShare();
   });
   $("plist").addEventListener("click", (e) => {
@@ -201,7 +221,13 @@
   });
 
   // ---------- Recap ----------
-  const gemsHtml = (p) => `<span class="dm" aria-label="${p.diamonds} diamond${p.diamonds === 1 ? "" : "s"}${p.refinedCount ? `, ${p.refinedCount} platinum` : ""}">${[0, 1, 2].map((i) => (i < p.diamonds ? `<span class="${i < p.refinedCount ? "p" : "g"}">\u25c6</span>` : `<span class="o">\u25c7</span>`)).join("")}</span>`;
+  // Left to right is top to bottom. The top refinedCount diamonds are icy; gold fills the rest from the bottom.
+  const gemsHtml = (p) => {
+    const d = Math.min(3, p.diamonds || 0), r = Math.min(d, p.refinedCount || 0);
+    const bits = [2, 1, 0].map((i) => (i >= d ? `<span class="o">\u25c7</span>` : `<span class="${i >= d - r ? "p" : "g"}">\u25c6</span>`)).join("");
+    const label = r ? `${d} diamonds, refined +${r}` : `${d} diamond${d === 1 ? "" : "s"}`;
+    return `<span class="dm" aria-label="${label}">${bits}</span>`;
+  };
   const sig = (p) => [p.diamonds, p.refinedCount, p.equipped ? 1 : 0].join("|");
   function groupPieces(list) {
     const m = new Map();
@@ -209,8 +235,8 @@
     return [...m.values()].sort((a, b) => G.pieceOrder(a.p, b.p));
   }
   const pieceLi = ({ p, n }) => {
-    const kind = refKind(p);
-    return `<li><span class="ic"><img src="${spriteUrl(p.cls.toLowerCase() + "-" + p.slot)}" alt="" width="34" height="34"></span><div>${gemsHtml(p)} ${kind === "refined" ? `<span class="chipx ref">Refined</span>` : ""} ${p.equipped ? `<span class="chipx eq">Equipped</span>` : `<span class="chipx spare">Spare</span>`}</div>${n > 1 ? `<span class="mult">\u00d7${n}</span>` : "<span></span>"}</li>`;
+    const r = p.refinedCount || 0;
+    return `<li><span class="ic"><img src="${spriteUrl(p.cls.toLowerCase() + "-" + p.slot)}" alt="" width="34" height="34"></span><div>${gemsHtml(p)} ${r ? `<span class="chipx ref">Refined +${r}</span>` : ""} ${p.equipped ? `<span class="chipx eq">Equipped</span>` : `<span class="chipx spare">Spare</span>`}</div>${n > 1 ? `<span class="mult">\u00d7${n}</span>` : "<span></span>"}</li>`;
   };
   const det = (key, cls, title, n, meta, body) => `<details class="x ${cls}" data-k="${key}"${open.has(key) ? " open" : ""}><summary><span class="t">${esc(title)}</span>${meta ? `<span class="m">${meta}</span>` : ""}<span class="n">${n}</span></summary><div class="body">${body}</div></details>`;
   const barRows = (rows) => { const max = Math.max(1, ...rows.map((r) => r[1])); return rows.map(([l, n]) => `<div class="br"><span>${esc(l)}</span><span class="t"><i style="width:${Math.round((n / max) * 100)}%"></i></span><b>${n}</b></div>`).join(""); };
@@ -224,11 +250,13 @@
     const cls = (c) => R.byClass[c];
     const tiles = `<div class="tiles"><div class="tile"><div class="k">Pieces</div><div class="v">${T}</div></div>${CLS.map((c) => `<div class="tile cls"><div class="k">${c} \u00b7 ${G.CLASSES[c].name}</div><div class="v">${cls(c).total}</div><div class="s">Refined ${cls(c).refined} \u00b7 Equipped ${cls(c).equipped}</div></div>`).join("")}</div>`;
     const stats = slotTable(R) + `<div class="stats">
-      <div class="stat"><h4>Gear type</h4>${barRows([["Refined (platinum)", R.refined], ["Normal (gold)", R.plain], ["Not yet Upgrade", R.noDiamonds]])}</div>
+      <div class="stat"><h4>Gear type</h4>${barRows([["Refined", R.refined], ["Normal (gold)", R.plain], ["Not yet Upgrade", R.noDiamonds]])}</div>
       <div class="stat"><h4>Transcendence (diamonds)</h4>${barRows([0, 1, 2, 3].map((d) => [d ? "\u25c6".repeat(d) + " (" + d + ")" : "None (0)", R.transc[d]]))}</div>
       <div class="stat"><h4>Equipped or spare</h4>${barRows([["Equipped", R.equipped], ["Spare", R.spare]])}</div></div>`;
     const sets = G.completeSets(items);
-    const setLine = `<p class="hint">Full sets (helmet + armor + boots + weapon of one class): ${CLS.map((c) => `${c} (${G.CLASSES[c].name}) <b>${sets[c].complete}</b>`).join(" \u00b7 ")}</p>`;
+    const refined = G.refinedSets(items);
+    const pills = (fn) => `<ul>${CLS.map((c) => `<li><b>${c}</b><span>${fn(c)}</span></li>`).join("")}</ul>`;
+    const setLine = `<div class="setline"><p>Full sets</p>${pills((c) => sets[c].complete)}</div><div class="setline ref"><p>Full refined sets</p>${pills((c) => refined[c].complete)}</div>`;
     let html = det("overview", "ov", "Overview", T, "", tiles + stats + setLine);
     for (const c of CLS) {
       const C = cls(c); if (!C.total) continue;

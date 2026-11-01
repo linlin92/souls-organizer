@@ -10,7 +10,9 @@ test("share model lists every piece, grouped by class and slot", () => {
   assert.equal(tiles.length, P.length);
   assert.equal(m.total, P.length);
   assert.equal(m.classes.find((c) => c.cls === "INT").slots[0].tiles.length, 23);
-  assert.equal(tiles.find((t) => t.sprite === "agi-weapon").refined, false); // 1 of 2 platinum: majority rule, a tie is not refined
+  const agi = tiles.find((t) => t.sprite === "agi-weapon");
+  assert.equal(agi.refined, true); // 1 icy diamond is refined +1, even when the other diamond stays gold
+  assert.equal(agi.refinedCount, 1);
   assert.deepEqual(m.spriteIds.sort(), ["agi-weapon", "int-helmet", "str-boots"]);
 });
 

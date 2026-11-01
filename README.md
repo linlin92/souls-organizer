@@ -10,7 +10,7 @@ Runs fully in the browser (no server code, no AI API, nothing uploaded). Same da
     node tools/preview.js  # headless Chrome run with the real screenshots -> preview/*.png (needs npm start)
 
 ## What it reads per tile
-slot, class (STR/AGI/INT; a "set" is just the class, a full set = helmet + armor + boots + weapon of one class), diamonds (0-3), refined (platinum on the whole tile, decided by majority; never "mixed") and equipped (E badge). Level is ignored. Only yellow (Mythic) tiles. Sparkles and glow are ignored.
+slot, class (STR/AGI/INT; a "set" is just the class, a full set = helmet + armor + boots + weapon of one class), diamonds (0-3), refined (+1 / +2 / +3 icy diamonds from the top, the rest stay gold) and equipped (E badge). Level is ignored. Only yellow (Mythic) tiles. Sparkles and glow are ignored.
 Tiles cut off or hidden behind the "Filter Applied" pill are merged across overlapping screenshots (never double counted).
 
 ## Files

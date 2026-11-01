@@ -16,8 +16,8 @@
   // ---------- model ----------
   // pieces: [{cls, slot, diamonds, refinedCount, equipped}]; R: Gear.recap(pieces)
   function model(pieces, R, opts) {
-    // refined is a whole-tile property: every diamond of a refined tile is platinum
-    const tile = (p) => { const d = Math.min(3, p.diamonds || 0), ref = d > 0 && (p.refinedCount || 0) * 2 > d; return { sprite: spriteId(p), diamonds: d, refined: ref, equipped: !!p.equipped }; };
+    // The top refinedCount diamonds are icy. The ones below them stay gold (+2 refined = 2 icy, 1 gold).
+    const tile = (p) => { const d = Math.min(3, p.diamonds || 0), refinedCount = Math.min(d, p.refinedCount || 0); return { sprite: spriteId(p), diamonds: d, refinedCount, refined: refinedCount > 0, equipped: !!p.equipped }; };
     const classes = CLASSES.map((cls) => {
       const mine = pieces.filter((p) => p.cls === cls);
       return {
@@ -65,7 +65,7 @@
     rr(c, x, y, TILE, TILE, 9); c.fillStyle = T.frame; c.fill(); c.lineWidth = 2.5; c.strokeStyle = T.mythic; rr(c, x + 1.25, y + 1.25, TILE - 2.5, TILE - 2.5, 8); c.stroke();
     const img = imgs[t.sprite];
     if (img) { const box = TILE - 14, s = Math.min(box / img.width, box / img.height); const w = img.width * s, h = img.height * s; c.drawImage(img, x + (TILE - w) / 2 + 3, y + (TILE - h) / 2 + 3, w, h); }
-    for (let i = 0; i < t.diamonds; i++) gem(c, T, x + 10, y + TILE - 12 - i * 15, 7, t.refined);
+    for (let i = 0; i < t.diamonds; i++) gem(c, T, x + 10, y + TILE - 12 - i * 15, 7, i >= t.diamonds - (t.refinedCount || 0));
     if (t.equipped) { rr(c, x + TILE - 19, y + TILE - 19, 16, 16, 4); c.fillStyle = T.bg; c.fill(); c.lineWidth = 1.5; c.strokeStyle = T.line2; c.stroke(); font(c, "800", 12, HEAD); c.fillStyle = T.ink; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("E", x + TILE - 11, y + TILE - 10.5); }
     c.restore();
   }

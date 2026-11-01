@@ -93,15 +93,32 @@ shotTest("non-yellow tiles are skipped (synthetic: red/blue swapped copy of shot
   assert.strictEqual(read.length, 0);
 });
 
-test("refined is all-or-none per tile: majority wins, no 'mixed' anywhere", () => {
+test("refine level is the icy diamond count: +1 and +2 stay mixed with gold", () => {
   const P = [{ cls: "INT", set: "int", slot: "helmet", level: 1, diamonds: 3, refinedCount: 2, equipped: true }, { cls: "INT", set: "int", slot: "helmet", level: 1, diamonds: 3, refinedCount: 1, equipped: true },
     { cls: "INT", set: "int", slot: "helmet", level: 1, diamonds: 3, refinedCount: 3, equipped: true }, { cls: "INT", set: "int", slot: "helmet", level: 1, diamonds: 0, refinedCount: 0, equipped: true }];
-  assert.deepStrictEqual(P.map(G.isRefined), [true, false, true, false]);
+  assert.deepStrictEqual(P.map(G.isRefined), [true, true, true, false]);
   const R = G.recap(P);
-  assert.strictEqual(R.refined, 2); assert.strictEqual(R.plain, 1); assert.strictEqual(R.noDiamonds, 1);
+  assert.strictEqual(R.refined, 3); assert.strictEqual(R.plain, 0); assert.strictEqual(R.noDiamonds, 1);
   assert.ok(!("mixed" in R) && !("mixed" in R.byClass.INT) && G.isMixed === undefined);
   if (!HAS_SHOTS) return;
-  for (const s of ["shot2", "shot3", "shot4", "shot5", "shot6"]) for (const r of A(s).rows) for (const c of r.cols) { const x = c.tile; if (x.ignored) continue; assert.ok(x.refinedCount === 0 || x.refinedCount === x.diamonds, s); }
+  for (const s of ["shot2", "shot3", "shot4", "shot5", "shot6"]) for (const r of A(s).rows) for (const c of r.cols) { const x = c.tile; if (x.ignored) continue; assert.ok(x.refinedCount >= 0 && x.refinedCount <= x.diamonds, s); }
+});
+
+test("a filtered one-class screenshot is not counted twice", () => {
+  const tile = (cls) => ({ tile: { ignored: false, cls } });
+  const row = (list) => ({ kind: "full", cols: list.map(tile) });
+  const mixed = { rows: [row(["AGI", "STR", "STR", "INT", "AGI", "STR", "INT", "STR"])] };
+  const filtered = { rows: [row(["AGI", "AGI", "AGI", "AGI", "AGI", "AGI", "AGI", "AGI"])] };
+  const pieces = [
+    { cls: "AGI", slot: "armor", src: { shot: 1, seenIn: [1] } },
+    { cls: "AGI", slot: "helmet", src: { shot: 2, seenIn: [2] } },
+    { cls: "STR", slot: "helmet", src: { shot: 1, seenIn: [1] } },
+    { cls: "AGI", slot: "boots", src: { shot: 2, seenIn: [2, 1] } },
+  ];
+  const out = G.preferFiltered([mixed, filtered], pieces);
+  assert.deepStrictEqual(out.filtered, ["AGI"]);
+  assert.deepStrictEqual(out.pieces.map((p) => p.cls + " " + p.slot), ["AGI helmet", "STR helmet", "AGI boots"]);
+  assert.deepStrictEqual(G.preferFiltered([mixed], pieces).pieces.length, 4);
 });
 
 test("only four slots, 12 sprites, sets are named STR / AGI / INT", () => {
@@ -113,7 +130,7 @@ test("only four slots, 12 sprites, sets are named STR / AGI / INT", () => {
 
 shotTest("refined per slot (overall and per class) equals the hand count", () => {
   const R = G.recap(G.toPieces(G.merge(["shot2", "shot3", "shot4", "shot5", "shot6"].map(A)).tiles));
-  const t = ROWS.flat(), ref = (x) => x.diamonds > 0 && x.platinum * 2 > x.diamonds;
+  const t = ROWS.flat(), ref = (x) => x.platinum > 0;
   for (const sl of G.SLOTS) {
     assert.strictEqual(R.slotStats[sl].total, t.filter((x) => x.slot === sl).length, sl + " total");
     assert.strictEqual(R.slotStats[sl].refined, t.filter((x) => x.slot === sl && ref(x)).length, sl + " refined");

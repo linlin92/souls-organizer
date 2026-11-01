@@ -36,7 +36,6 @@
     cls: "Not sure of the class icon, please pick",
     mismatch: "Class icon and set do not match, please check",
     gem: "Diamond count unsure",
-    gemColour: "Diamond colour unclear (platinum or gold?), please check",
     differs: "Screenshots disagree on this piece (probably taken at different times)",
   };
 
@@ -140,32 +139,44 @@
   }
   const isPale = (r, g, b) => b >= 150 && b >= r - 6 && g >= r - 6; // refined diamond: pale blue-white
   const isGold = (r, g, b) => r >= 150 && g / r >= 0.94 && b / r >= 0.28 && b / r <= 0.66; // normal diamond: bright yellow face
+  // share of pale vs gold pixels over the rhombus core at a template match
+  function gemFace(img, g, bpos) {
+    let pale = 0, gold = 0, n = 0;
+    if (bpos && g) for (let y = 0; y < g.h; y++) for (let x = 0; x < g.w; x++) {
+      const dx = Math.abs(x - g.w / 2) / (g.w / 2), dy = Math.abs(y - g.h / 2) / (g.h / 2);
+      if (dx + dy > 0.75) continue;
+      const X = bpos.x + x, Y = bpos.y + y;
+      if (X < 0 || Y < 0 || X >= img.width || Y >= img.height) continue;
+      const i = (Y * img.width + X) * 4, r = img.data[i], gg = img.data[i + 1], b = img.data[i + 2];
+      n++; if (isPale(r, gg, b)) pale++; else if (isGold(r, gg, b)) gold++;
+    }
+    return { pale: n ? pale / n : 0, gold: n ? gold / n : 0 };
+  }
   // -> { n, refined, kinds:[...bottom-up], scores:[...], unsure }
   function readDiamonds(m, img) {
     const scores = [], kinds = [];
-    const DN = 64;
+    const face = m.gem.normal;
     for (let k = 0; k < 3; k++) {
-      let best = -2, bk = "normal", bpos = null;
+      let near = -2, nearPos = null, wide = -2, widePos = null;
       for (const name of Object.keys(m.gem)) {
         const g = m.gem[name];
         const ox = Math.round(GEM.cx * T - g.w / 2), oy = Math.round(GEM.cy[k] * T - g.h / 2);
-        const r = bestAround(img, g.px, ox, oy, 3);
-        if (r.score > best) { best = r.score; bk = name; bpos = r; }
+        const a = bestAround(img, g.px, ox, oy, 3);
+        const b = bestAround(img, g.px, ox, oy, 7);
+        if (a.score > near) { near = a.score; nearPos = a; }
+        if (b.score > wide) { wide = b.score; widePos = b; }
       }
-      scores.push(best);
-      // colour of the gem face at the best position (share of pale vs gold pixels over the rhombus core)
-      let pale = 0, gold = 0, n = 0;
-      const g = m.gem.normal;
-      if (bpos) for (let y = 0; y < g.h; y++) for (let x = 0; x < g.w; x++) {
-        const dx = Math.abs(x - g.w / 2) / (g.w / 2), dy = Math.abs(y - g.h / 2) / (g.h / 2);
-        if (dx + dy > 0.75) continue;
-        const px = bpos.x + x - Math.round((bpos.x - Math.round(GEM.cx * T - g.w / 2))) + Math.round((bpos.x - Math.round(GEM.cx * T - g.w / 2)));
-        const X = bpos.x + x, Y = bpos.y + y;
-        if (X < 0 || Y < 0 || X >= img.width || Y >= img.height) continue;
-        const i = (Y * img.width + X) * 4, r = img.data[i], gg = img.data[i + 1], b = img.data[i + 2];
-        n++; if (isPale(r, gg, b)) pale++; else if (isGold(r, gg, b)) gold++;
-      }
-      kinds.push(n && pale > gold ? "refined" : "normal");
+      // The usual window is a few pixels. A wider window catches an icy diamond when the tile crop is slightly off,
+      // but only when the match actually sits on an icy face — empty artwork can correlate a little and must not count.
+      const wideFace = gemFace(img, face, widePos);
+      const useWide = wide >= FLAG.gem && wideFace.pale >= 0.55 && wide >= near;
+      const best = useWide ? wide : near;
+      const col = useWide ? wideFace : gemFace(img, face, nearPos);
+      // An empty slot still correlates a little with the diamond template. If the spot is neither icy nor gold, it is empty.
+      const colored = col.pale >= 0.4 || col.gold >= 0.22;
+      const score = !colored && best < 0.58 ? Math.min(best, FLAG.gemNo) : best;
+      scores.push(score);
+      kinds.push(col.pale > col.gold && col.pale > 0 ? "refined" : "normal");
     }
     // gems stack from the bottom: count the leading slots that are clearly gems
     let cnt = 0;
@@ -180,10 +191,12 @@
   function readTile(m, srcImg, srcRect, row) {
     const tile = { flags: [], ignored: false };
     const partial = row.kind !== "full";
+    const ra = V.rarityOf(srcImg, srcRect);
+    tile.rarity = ra.rarity;
+    // Cut-off rows are never read. Red Legendary (and anything that is not yellow Mythic) is never read either.
     if (partial) { tile.ignored = true; tile.cutOff = true; return tile; }
     if (row.kind === "bottom") { /* never read */ }
     const { img, rect } = norm(srcImg, srcRect);
-    const ra = V.rarityOf(srcImg, srcRect);
     if (ra.rarity !== "mythic") { tile.ignored = true; tile.notMythic = true; return tile; }
     if (V.looksBlurred(srcImg, srcRect, null)) { tile.ignored = true; tile.blurred = true; return tile; }
     // tile as its own image so the template offsets are plain pixel coordinates
@@ -195,24 +208,26 @@
     const eq = V.isEquipped(t, { x: 0, y: 0, w: t.width, h: t.height });
     tile.equipped = eq;
     const d = readDiamonds(m, t);
-    // A tile is refined or not as a whole (the game never mixes platinum and gold on one tile), so the colour is decided by majority.
-    // A split read (some platinum, some gold) is a misread: majority wins, and the tile is flagged. An exact tie counts as not refined.
-    const split = d.refined > 0 && d.refined < d.n;
+    // Diamonds are the transcendence track (0 to 3, all gold). Refine starts at 3 diamonds and turns them icy from the top:
+    // +1 refined is 1 icy and 2 gold, +2 refined is 2 icy and 1 gold, +3 refined is 3 icy. A mix is the refine level, not a misread.
     tile.diamonds = d.n; tile.gemKinds = d.kinds; tile.gemScores = d.scores.map((s) => +s.toFixed(2));
-    tile.refinedCount = d.refined * 2 > d.n ? d.n : 0;
+    // Refine turns diamonds icy only after all 3 are filled. A shorter stack is transcendence, so those diamonds stay gold.
+    tile.refinedCount = d.n >= 3 ? d.refined : 0;
     tile.refined = tile.refinedCount > 0;
-    tile.gemSplit = split;
     tile.gemUnsure = d.unsure;
     tile.flags = flagsOf(tile);
     return tile;
   }
   function flagsOf(t) {
     const f = [];
-    if (t.spriteScore < FLAG.spr || t.spriteMargin < FLAG.sprMargin) f.push(FLAG_TXT.sprite);
-    if (t.clsScore < FLAG.cls || t.clsMargin < FLAG.clsMargin) f.push(FLAG_TXT.cls);
-    else if (t.set && SETS[t.set] && SETS[t.set].cls !== t.cls && !(t.spriteScore < FLAG.spr || t.spriteMargin < FLAG.sprMargin)) f.push(FLAG_TXT.mismatch);
+    const spriteSure = t.spriteScore >= FLAG.spr && t.spriteMargin >= FLAG.sprMargin;
+    const setCls = t.set && SETS[t.set] ? SETS[t.set].cls : "";
+    const agrees = !!(setCls && t.cls === setCls);
+    if (!spriteSure) f.push(FLAG_TXT.sprite);
+    // The class icon is small. When it already names the same class as a confident piece, a thin margin is not a miss.
+    if (t.clsScore < FLAG.cls || (t.clsMargin < FLAG.clsMargin && !(spriteSure && agrees))) f.push(FLAG_TXT.cls);
+    else if (setCls && !agrees && spriteSure) f.push(FLAG_TXT.mismatch);
     if (t.gemUnsure) f.push(FLAG_TXT.gem);
-    if (t.gemSplit) f.push(FLAG_TXT.gemColour);
     return f;
   }
   function cropTile(img, rect) {
@@ -318,7 +333,12 @@
       members.sort((p, q) => (q.row.kind === "full") - (p.row.kind === "full") || nFlags(p) - nFlags(q) || Math.round(q.row.visBottom - q.row.visTop) - Math.round(p.row.visBottom - p.row.visTop));
       const rep = members[0];
       duplicates += members.length - 1;
-      if (rep.row.kind !== "full") { partialOnly++; out.push({ partialRow: true, src: { shot: rep.si + 1, row: rep.ri, seenIn: members.map((x) => x.si + 1) } }); continue; }
+      if (rep.row.kind !== "full") {
+        const mythicCut = rep.row.cols.some((c) => c.tile && c.tile.rarity === "mythic");
+        partialOnly++;
+        out.push({ partialRow: true, mythicCut, src: { shot: rep.si + 1, row: rep.ri, seenIn: members.map((x) => x.si + 1) } });
+        continue;
+      }
       for (let c = 0; c < 5; c++) {
         const tile = Object.assign({}, rep.row.cols[c].tile);
         tile.flags = tile.flags.slice();
@@ -338,7 +358,7 @@
     const other = views.find((v) => v !== tile && clean(v));
     if (tile.flags.length && other) {
       Object.assign(tile, { set: other.set, slot: other.slot, spriteScore: other.spriteScore, spriteMargin: other.spriteMargin, cls: other.cls, clsScore: other.clsScore, clsMargin: other.clsMargin,
-        diamonds: other.diamonds, refinedCount: other.refinedCount, refined: other.refined, gemSplit: other.gemSplit, gemKinds: other.gemKinds, gemUnsure: false, equipped: other.equipped });
+        diamonds: other.diamonds, refinedCount: other.refinedCount, refined: other.refined, gemKinds: other.gemKinds, gemUnsure: false, equipped: other.equipped });
       tile.flags = [];
     }
     const sure = views.filter(clean);
@@ -351,12 +371,12 @@
   function toPieces(tiles) {
     let id = 0;
     return tiles.filter((t) => !t.ignored && !t.partialRow && t.slot).map((t) => ({
-      id: ++id, cls: t.cls, set: t.set, slot: t.slot, diamonds: t.diamonds || 0, refinedCount: t.refinedCount || 0, // already all-or-none (see readTile)
+      id: ++id, cls: t.cls, set: t.set, slot: t.slot, diamonds: t.diamonds || 0, refinedCount: t.refinedCount || 0, // icy diamonds: 1, 2, or 3 is refined +1, +2, or +3
       equipped: !!t.equipped, flags: (t.flags || []).slice(), src: t.src,
     }));
   }
-  // refined is a whole-tile property: platinum on the majority of the diamonds (a tile never really mixes them)
-  const isRefined = (p) => p.diamonds > 0 && p.refinedCount * 2 > p.diamonds;
+  // Any icy diamond means the piece is refined. The count is the refine level: +1, +2, or +3.
+  const isRefined = (p) => (p.refinedCount || 0) > 0;
   function recap(pieces) {
     const newC = () => ({ total: 0, refined: 0, plain: 0, equipped: 0, spare: 0, slots: {}, slotStats: Object.fromEntries(SLOTS.map((s) => [s, { total: 0, refined: 0 }])), sets: {} });
     const R = { total: pieces.length, byClass: {}, refined: 0, plain: 0, noDiamonds: 0, transc: { 0: 0, 1: 0, 2: 0, 3: 0 }, equipped: 0, spare: 0,
@@ -455,5 +475,30 @@
     return { owned, steps, current, finalRows, chase, done: !current };
   }
 
-  return { CLASSES, CLASS_ORDER, SLOTS, SLOT_NAME, SETS, SPRITES, FLAG, FLAG_TXT, buildMatcher, readTile, analyze, merge, toPieces, recap, completeSets, refinedSets, advice, isRefined, pieceOrder, matchSprite, matchClass, readDiamonds, cropTile, norm };
+  // A screenshot where every mythic tile is the same class is a filtered inventory (the game's Filter Applied view).
+  // Those pieces also appear in the unfiltered shots, but in a different order, so row matching would count them twice.
+  // For that class, keep the copy that was seen in the filtered screenshot.
+  function preferFiltered(analyses, pieces) {
+    const pure = new Map();
+    analyses.forEach((an, si) => {
+      const cls = [];
+      an.rows.forEach((r) => r.cols.forEach((c) => { const t = c.tile; if (t && !t.ignored && !t.partialRow && t.cls) cls.push(t.cls); }));
+      const kinds = new Set(cls);
+      if (cls.length >= 8 && kinds.size === 1) {
+        const k = [...kinds][0];
+        if (!pure.has(k)) pure.set(k, new Set());
+        pure.get(k).add(si + 1);
+      }
+    });
+    if (!pure.size) return { pieces, filtered: [] };
+    const kept = pieces.filter((p) => {
+      const shots = pure.get(p.cls);
+      if (!shots) return true;
+      const seen = (p.src && p.src.seenIn) || [p.src && p.src.shot];
+      return seen.some((s) => shots.has(s));
+    });
+    return { pieces: kept, filtered: [...pure.keys()] };
+  }
+
+  return { CLASSES, CLASS_ORDER, SLOTS, SLOT_NAME, SETS, SPRITES, FLAG, FLAG_TXT, buildMatcher, readTile, analyze, merge, toPieces, recap, completeSets, refinedSets, advice, isRefined, pieceOrder, matchSprite, matchClass, readDiamonds, cropTile, norm, preferFiltered };
 });
