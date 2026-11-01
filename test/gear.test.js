@@ -9,11 +9,11 @@ const { ROWS, SHOTS, CLASS_OF } = require("./truth.js");
 const m = matcher();
 const shots = {};
 const A = (n) => shots[n] || (shots[n] = G.analyze(m, loadImage(path.join(root, "test/fixtures/screens", n + ".jpg"))));
-const FIELDS = ["set", "slot", "cls", "level", "diamonds", "refined", "equipped"];
-const want = (tr) => ({ set: tr.set, slot: tr.slot, cls: CLASS_OF[tr.set], level: tr.level, diamonds: tr.diamonds, refined: tr.diamonds > 0 && tr.platinum === tr.diamonds, equipped: tr.equipped });
-const got = (t) => ({ set: t.set, slot: t.slot, cls: t.cls, level: t.level, diamonds: t.diamonds, refined: t.refined, equipped: t.equipped });
+const FIELDS = ["set", "slot", "cls", "diamonds", "refined", "equipped"];
+const want = (tr) => ({ set: tr.set, slot: tr.slot, cls: CLASS_OF[tr.set], diamonds: tr.diamonds, refined: tr.diamonds > 0 && tr.platinum === tr.diamonds, equipped: tr.equipped });
+const got = (t) => ({ set: t.set, slot: t.slot, cls: t.cls, diamonds: t.diamonds, refined: t.refined, equipped: t.equipped });
 // reader misses that are known and honest: they must stay flagged "unsure" so the check step shows them
-const KNOWN_MISS = { "shot5 r3c3 level": "reads +160 as 168 (0 vs 8); flagged as Level unsure" };
+const KNOWN_MISS = {};
 
 test("row detection: full rows are read, cut-off rows are never read", () => {
   for (const [s, exp] of Object.entries(SHOTS)) {
@@ -125,3 +125,35 @@ test("refined per slot (overall and per class) equals the hand count", () => {
   for (const c of ["STR", "AGI", "INT"]) assert.strictEqual(sets[c].complete, Math.min(...G.SLOTS.map((sl) => R.byClass[c].slotStats[sl].total)));
 });
 function SLOT_SUM(R, k) { return G.SLOTS.reduce((a, sl) => a + R.slotStats[sl][k], 0); }
+
+test("advice walks the refined-set steps and names the short slot", () => {
+  const pcs = (cls, slot, n) => Array.from({ length: n }, () => ({ cls, slot, diamonds: 3, refinedCount: 3, equipped: true }));
+  const bag = [
+    ...pcs("STR", "helmet", 1), ...pcs("STR", "armor", 2), ...pcs("STR", "boots", 2), ...pcs("STR", "weapon", 2),
+    ...pcs("AGI", "helmet", 4), ...pcs("AGI", "armor", 3), ...pcs("AGI", "boots", 4), ...pcs("AGI", "weapon", 4),
+    ...pcs("INT", "helmet", 5), ...pcs("INT", "armor", 6), ...pcs("INT", "boots", 5), ...pcs("INT", "weapon", 4),
+  ];
+  const A = G.advice(bag);
+  assert.deepStrictEqual(Object.fromEntries(["STR", "AGI", "INT"].map((c) => [c, A.owned[c].complete])), { STR: 1, AGI: 3, INT: 4 });
+  assert.strictEqual(A.current.step, 3);
+  assert.strictEqual(A.chase.cls, "STR");
+  assert.deepStrictEqual(A.chase.slots, ["helmet"]);
+  assert.strictEqual(A.chase.short, 1);
+  assert.strictEqual(A.finalRows.find((r) => r.cls === "STR").note, "short 3 + 1 Helmet");
+  assert.strictEqual(A.finalRows.find((r) => r.cls === "INT").note, "short 5 + 1 Weapon");
+  assert.strictEqual(A.finalRows.find((r) => r.cls === "AGI").note, "done");
+  assert.ok(A.steps[0].met && A.steps[1].met && !A.steps[2].met && !A.steps[3].met);
+
+  const none = G.advice([]);
+  assert.strictEqual(none.current.step, 1);
+  assert.strictEqual(none.chase.cls, "AGI");
+  assert.strictEqual(none.chase.short, 3);
+  assert.deepStrictEqual(none.chase.slots, ["helmet", "armor", "boots", "weapon"]);
+
+  const both = G.advice([...pcs("AGI", "helmet", 3), ...pcs("AGI", "armor", 3), ...pcs("AGI", "boots", 3), ...pcs("AGI", "weapon", 3)]);
+  assert.strictEqual(both.current.step, 2);
+  assert.strictEqual(both.chase.cls, "INT");
+
+  const done = [...pcs("STR", "helmet", 5), ...pcs("STR", "armor", 5), ...pcs("STR", "boots", 5), ...pcs("STR", "weapon", 5), ...pcs("AGI", "helmet", 3), ...pcs("AGI", "armor", 3), ...pcs("AGI", "boots", 3), ...pcs("AGI", "weapon", 3), ...pcs("INT", "helmet", 10), ...pcs("INT", "armor", 10), ...pcs("INT", "boots", 10), ...pcs("INT", "weapon", 10)];
+  assert.strictEqual(G.advice(done).done, true);
+});

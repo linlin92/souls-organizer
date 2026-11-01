@@ -1,4 +1,4 @@
-// Share image: a compact PNG of the Equipment recap for Discord. EVERY piece is shown as a small tile (sprite, level, diamonds, E).
+// Share image: a compact PNG of the Equipment recap for Discord. EVERY piece is shown as a small tile (sprite, diamonds, E).
 // model() is pure (no DOM, tested in Node); render() paints it on a canvas in the browser (no network, no server: the sprites are the site's own files).
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
@@ -11,13 +11,13 @@
   const SLOTS = ["helmet", "armor", "boots", "weapon"];
   const CLASSES = ["STR", "AGI", "INT"];
   const spriteId = (p) => String(p.cls || "").toLowerCase() + "-" + p.slot;
-  const order = (a, b) => b.level - a.level || b.diamonds - a.diamonds || b.refinedCount - a.refinedCount || (b.equipped ? 1 : 0) - (a.equipped ? 1 : 0);
+  const order = (a, b) => b.diamonds - a.diamonds || b.refinedCount - a.refinedCount || (b.equipped ? 1 : 0) - (a.equipped ? 1 : 0);
 
   // ---------- model ----------
-  // pieces: [{cls, slot, level, diamonds, refinedCount, equipped}]; R: Gear.recap(pieces)
+  // pieces: [{cls, slot, diamonds, refinedCount, equipped}]; R: Gear.recap(pieces)
   function model(pieces, R, opts) {
     // refined is a whole-tile property: every diamond of a refined tile is platinum
-    const tile = (p) => { const d = Math.min(3, p.diamonds || 0), ref = d > 0 && (p.refinedCount || 0) * 2 > d; return { sprite: spriteId(p), level: p.level || 0, diamonds: d, refined: ref, equipped: !!p.equipped }; };
+    const tile = (p) => { const d = Math.min(3, p.diamonds || 0), ref = d > 0 && (p.refinedCount || 0) * 2 > d; return { sprite: spriteId(p), diamonds: d, refined: ref, equipped: !!p.equipped }; };
     const classes = CLASSES.map((cls) => {
       const mine = pieces.filter((p) => p.cls === cls);
       return {
@@ -27,12 +27,12 @@
     });
     const C = (c) => R.byClass[c];
     return {
-      title: "SOULS Organizer", sub: "Equipment", date: (opts && opts.date) || "", total: pieces.length,
+      title: "SOULS GEAR ADVISOR", sub: "Equipment", date: (opts && opts.date) || "", total: pieces.length,
       stats: {
         byClass: CLASSES.map((c) => ({ cls: c, name: CLASS_NAME[c], total: C(c).total, refined: C(c).refined, plain: C(c).plain, equipped: C(c).equipped, spare: C(c).spare })),
         slotStats: SLOTS.map((sl) => ({ slot: sl, name: SLOT_NAME[sl], all: R.slotStats[sl], byClass: CLASSES.map((c) => R.byClass[c].slotStats[sl]) })),
         refined: R.refined, plain: R.plain, noDiamonds: R.noDiamonds, transc: [0, 1, 2, 3].map((d) => R.transc[d] || 0),
-        equipped: R.equipped, spare: R.spare, levels: R.levels.filter((l) => l.n > 0).map((l) => ({ label: l.label, n: l.n })),
+        equipped: R.equipped, spare: R.spare,
       },
       classes,
       spriteIds: [...new Set(pieces.map(spriteId))],
@@ -51,8 +51,8 @@
   }
   function rr(c, x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
   const font = (c, w, px, fam) => { c.font = `${w} ${px}px ${fam || SANS}`; };
-  // Refined vs normal diamonds must be easy to tell apart: normal = saturated gold, refined (platinum) = icy pale blue-white, and every refined tile carries an "R" mark.
-  const GOLD = { hi: "#ffd54a", lo: "#f09a00", edge: "#7a4a00" }, ICE = { hi: "#f4fcff", lo: "#9fd6f2", edge: "#3f8ab5", ink: "#0d2a3a" };
+  // Refined vs normal diamonds must be easy to tell apart: normal = saturated gold, refined (platinum) = icy pale blue-white.
+  const GOLD = { hi: "#ffd54a", lo: "#f09a00", edge: "#7a4a00" }, ICE = { hi: "#f4fcff", lo: "#9fd6f2", edge: "#3f8ab5" };
   function gem(c, T, cx, cy, r, refined) {
     const K = refined ? ICE : GOLD;
     c.beginPath(); c.moveTo(cx, cy - r); c.lineTo(cx + r * 0.85, cy); c.lineTo(cx, cy + r); c.lineTo(cx - r * 0.85, cy); c.closePath();
@@ -65,9 +65,7 @@
     rr(c, x, y, TILE, TILE, 9); c.fillStyle = T.frame; c.fill(); c.lineWidth = 2.5; c.strokeStyle = T.mythic; rr(c, x + 1.25, y + 1.25, TILE - 2.5, TILE - 2.5, 8); c.stroke();
     const img = imgs[t.sprite];
     if (img) { const box = TILE - 14, s = Math.min(box / img.width, box / img.height); const w = img.width * s, h = img.height * s; c.drawImage(img, x + (TILE - w) / 2 + 3, y + (TILE - h) / 2 + 3, w, h); }
-    if (t.level > 0) { const s = "+" + t.level; font(c, "800", 14); c.textAlign = "right"; c.textBaseline = "alphabetic"; c.lineJoin = "round"; c.lineWidth = 4; c.strokeStyle = T.bg; c.strokeText(s, x + TILE - 5, y + 16); c.fillStyle = T.gold; c.fillText(s, x + TILE - 5, y + 16); }
     for (let i = 0; i < t.diamonds; i++) gem(c, T, x + 10, y + TILE - 12 - i * 15, 7, t.refined);
-    if (t.refined) { c.beginPath(); c.arc(x + 12, y + 12, 8.5, 0, Math.PI * 2); c.fillStyle = ICE.hi; c.fill(); c.lineWidth = 1.5; c.strokeStyle = ICE.edge; c.stroke(); font(c, "800", 12, SANS); c.fillStyle = ICE.ink; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("R", x + 12, y + 12.5); }
     if (t.equipped) { rr(c, x + TILE - 19, y + TILE - 19, 16, 16, 4); c.fillStyle = T.bg; c.fill(); c.lineWidth = 1.5; c.strokeStyle = T.line2; c.stroke(); font(c, "800", 12, HEAD); c.fillStyle = T.ink; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("E", x + TILE - 11, y + TILE - 10.5); }
     c.restore();
   }
@@ -96,13 +94,12 @@
       text(`Equipped ${k.equipped} \u00b7 Spare ${k.spare}`, x + 18, y + 98, 16, "500", T.mut);
     });
     y += ch + 14;
-    // refined | transcendence | equipped | levels
-    const s = m.stats, qw = (W - 2 * PAD - 36) / 4, lines = Math.max(4, s.levels.length), qh = 40 + lines * 25 + 8;
+    // refined | transcendence | equipped
+    const s = m.stats, qw = (W - 2 * PAD - 24) / 3, lines = 4, qh = 40 + lines * 25 + 8;
     const cells = [
-      ["REFINED", [[`Refined`, s.refined], [`Normal`, s.plain], [`No diamonds`, s.noDiamonds]]],
+      ["GEAR TYPE", [[`Refined`, s.refined], [`Normal`, s.plain], [`Not yet Upgrade`, s.noDiamonds]]],
       ["TRANSCENDENCE", s.transc.map((n, d) => [d ? "\u25c6".repeat(d) : "None", n])],
       ["EQUIPPED", [["Equipped", s.equipped], ["Spare", s.spare]]],
-      ["LEVEL", s.levels.map((l) => [l.label, l.n])],
     ];
     cells.forEach(([head, rows], i) => {
       if (!draw) return;
@@ -158,10 +155,8 @@
       c.fillStyle = T.line2; c.fillRect(PAD, y, W - 2 * PAD, 2);
       const ly = y + 38; let x = PAD;
       gem(c, T, x + 9, ly - 6, 9, false); text("gold = normal", x + 26, ly, 18, "600", T.ink); x += 190;
-      gem(c, T, x + 9, ly - 6, 9, true); text("icy white-blue = refined (platinum)", x + 26, ly, 18, "600", T.ink); x += 380;
-      c.beginPath(); c.arc(x + 9, ly - 6, 9, 0, Math.PI * 2); c.fillStyle = ICE.hi; c.fill(); c.lineWidth = 1.5; c.strokeStyle = ICE.edge; c.stroke(); font(c, "800", 12, SANS); c.fillStyle = ICE.ink; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("R", x + 9, ly - 5.5);
-      text("= refined tile", x + 26, ly, 18, "600", T.ink); x += 190;
-      text("+200 level \u00b7 E equipped", x, ly, 18, "500", T.mut);
+      gem(c, T, x + 9, ly - 6, 9, true); text("icy white-blue = refined", x + 26, ly, 18, "600", T.ink); x += 280;
+      text("E = equipped", x, ly, 18, "500", T.mut);
     }
     y += 70;
     return y;

@@ -35,8 +35,6 @@
     sprite: "Not sure which piece this is, please pick",
     cls: "Not sure of the class icon, please pick",
     mismatch: "Class icon and set do not match, please check",
-    level: "Level unsure",
-    levelBad: "Level unreadable",
     gem: "Diamond count unsure",
     gemColour: "Diamond colour unclear (platinum or gold?), please check",
     differs: "Screenshots disagree on this piece (probably taken at different times)",
@@ -125,7 +123,7 @@
     }
     const gem = {};
     for (const [k, img] of Object.entries(refs.diamonds)) { const sc = scaled(img, GEM.scale); gem[k] = { px: opaquePixels(sc, 0, 0, null, 1), w: sc.w, h: sc.h }; }
-    return { sprites, classes, gem, digits: { level: (refs.digits.level || []).concat(refs.digits.count || []) } };
+    return { sprites, classes, gem };
   }
 
   // ---------------------------------------------------------------- tile fields
@@ -176,27 +174,6 @@
     const refined = kinds.slice(0, cnt).filter((k) => k === "refined").length;
     return { n: cnt, refined, kinds: kinds.slice(0, cnt), scores, unsure };
   }
-  // The game fades the rows near the top and bottom edge of the list window, which dims the pale-yellow level digits below the reader's
-  // brightness thresholds. The tile is brightened first so that its brightest pixels sit at full scale (never darkened, gain capped).
-  function brighten(img) {
-    const hist = new Uint32Array(256), d = img.data, n = img.width * img.height;
-    for (let i = 0; i < n; i++) { const o = i * 4; hist[Math.max(d[o], d[o + 1], d[o + 2])]++; }
-    let acc = 0, p98 = 255;
-    for (let v = 255; v >= 0; v--) { acc += hist[v]; if (acc >= 0.02 * n) { p98 = v; break; } }
-    const gain = Math.min(1.7, Math.max(1, 252 / Math.max(120, p98)));
-    if (gain < 1.03) return img;
-    const out = new Uint8ClampedArray(d.length);
-    for (let i = 0; i < d.length; i += 4) { out[i] = d[i] * gain; out[i + 1] = d[i + 1] * gain; out[i + 2] = d[i + 2] * gain; out[i + 3] = 255; }
-    return { width: img.width, height: img.height, data: out };
-  }
-  function readLevel(img, m) {
-    // level text "+NNN" top right, in the same font as the advisor's digits (its count digit templates cover 0-9, level ones only some digits)
-    const R = V.REG.level, keep = R.fr;
-    R.fr = [0.42, 0.06, 0.995, 0.32];
-    let r;
-    try { r = V.readNumber(brighten(img), { x: 0, y: 0, w: img.width, h: img.height }, "level", m.digits); } finally { R.fr = keep; }
-    return r;
-  }
   const mythicLike = (img) => V.rarityOf(img, { x: 0, y: 0, w: img.width, h: img.height });
 
   // ---------------------------------------------------------------- one tile
@@ -215,10 +192,6 @@
     tile.set = sp[0].set; tile.slot = sp[0].slot; tile.spriteScore = sp[0].score; tile.spriteMargin = sp[0].score - sp[1].score;
     tile.alts = sp.slice(0, 3).map((x) => ({ id: x.id, score: +x.score.toFixed(3) }));
     tile.cls = cl[0].cls; tile.clsScore = cl[0].score; tile.clsMargin = cl[0].score - cl[1].score;
-    const lv = readLevel(t, m);
-    tile.level = lv.value === null ? 0 : lv.value;
-    tile.levelConf = lv.value === null ? 1 : lv.conf;
-    tile.levelBlank = lv.value === null;
     const eq = V.isEquipped(t, { x: 0, y: 0, w: t.width, h: t.height });
     tile.equipped = eq;
     const d = readDiamonds(m, t);
@@ -238,7 +211,6 @@
     if (t.spriteScore < FLAG.spr || t.spriteMargin < FLAG.sprMargin) f.push(FLAG_TXT.sprite);
     if (t.clsScore < FLAG.cls || t.clsMargin < FLAG.clsMargin) f.push(FLAG_TXT.cls);
     else if (t.set && SETS[t.set] && SETS[t.set].cls !== t.cls && !(t.spriteScore < FLAG.spr || t.spriteMargin < FLAG.sprMargin)) f.push(FLAG_TXT.mismatch);
-    if (!t.levelBlank && t.levelConf < FLAG.numConf) f.push(FLAG_TXT.level);
     if (t.gemUnsure) f.push(FLAG_TXT.gem);
     if (t.gemSplit) f.push(FLAG_TXT.gemColour);
     return f;
@@ -278,7 +250,7 @@
   // row (two items of the same kind) can therefore never be merged by accident, and nothing is double counted.
   // Two FULL rows are the same row when their readings agree tile by tile (an unsure tile counts as a wildcard) and they also look alike.
   // A cut-off row is never read, so it is only compared by looks, loosely, and it can never veto a shift on its own.
-  const sig = (t) => [t.set, t.slot, t.level, t.diamonds, t.refinedCount, t.equipped ? 1 : 0].join("|");
+  const sig = (t) => [t.set, t.slot, t.diamonds, t.refinedCount, t.equipped ? 1 : 0].join("|");
   function rowRel(ra, rb) {
     const th = V.rowSimilarity(ra, rb);
     if (th.d === -1) return { rel: "none", d: -1 };
@@ -366,29 +338,28 @@
     const other = views.find((v) => v !== tile && clean(v));
     if (tile.flags.length && other) {
       Object.assign(tile, { set: other.set, slot: other.slot, spriteScore: other.spriteScore, spriteMargin: other.spriteMargin, cls: other.cls, clsScore: other.clsScore, clsMargin: other.clsMargin,
-        level: other.level, levelConf: other.levelConf, levelBlank: other.levelBlank, diamonds: other.diamonds, refinedCount: other.refinedCount, refined: other.refined, gemSplit: other.gemSplit, gemKinds: other.gemKinds, gemUnsure: false, equipped: other.equipped });
+        diamonds: other.diamonds, refinedCount: other.refinedCount, refined: other.refined, gemSplit: other.gemSplit, gemKinds: other.gemKinds, gemUnsure: false, equipped: other.equipped });
       tile.flags = [];
     }
     const sure = views.filter(clean);
-    const sig = (v) => [v.set, v.slot, v.cls, v.level, v.diamonds, v.refinedCount, v.equipped].join("|");
+    const sig = (v) => [v.set, v.slot, v.cls, v.diamonds, v.refinedCount, v.equipped].join("|");
     if (new Set(sure.map(sig)).size > 1 && !tile.flags.includes(FLAG_TXT.differs)) tile.flags.push(FLAG_TXT.differs);
   }
 
   // ---------------------------------------------------------------- pieces and the recap
-  // merged tiles -> list of pieces {id,cls,set,slot,level,diamonds,refined,equipped,flags}
+  // merged tiles -> list of pieces {id,cls,set,slot,diamonds,refined,equipped,flags}
   function toPieces(tiles) {
     let id = 0;
     return tiles.filter((t) => !t.ignored && !t.partialRow && t.slot).map((t) => ({
-      id: ++id, cls: t.cls, set: t.set, slot: t.slot, level: t.level || 0, diamonds: t.diamonds || 0, refinedCount: t.refinedCount || 0, // already all-or-none (see readTile)
+      id: ++id, cls: t.cls, set: t.set, slot: t.slot, diamonds: t.diamonds || 0, refinedCount: t.refinedCount || 0, // already all-or-none (see readTile)
       equipped: !!t.equipped, flags: (t.flags || []).slice(), src: t.src,
     }));
   }
   // refined is a whole-tile property: platinum on the majority of the diamonds (a tile never really mixes them)
   const isRefined = (p) => p.diamonds > 0 && p.refinedCount * 2 > p.diamonds;
-  const LEVEL_BANDS = [[200, 200, "+200"], [150, 199, "+150 to +199"], [100, 149, "+100 to +149"], [1, 99, "+1 to +99"], [0, 0, "Not leveled (0)"]];
   function recap(pieces) {
     const newC = () => ({ total: 0, refined: 0, plain: 0, equipped: 0, spare: 0, slots: {}, slotStats: Object.fromEntries(SLOTS.map((s) => [s, { total: 0, refined: 0 }])), sets: {} });
-    const R = { total: pieces.length, byClass: {}, refined: 0, plain: 0, noDiamonds: 0, transc: { 0: 0, 1: 0, 2: 0, 3: 0 }, equipped: 0, spare: 0, levels: LEVEL_BANDS.map((b) => ({ label: b[2], min: b[0], max: b[1], n: 0 })), maxLevel: 0,
+    const R = { total: pieces.length, byClass: {}, refined: 0, plain: 0, noDiamonds: 0, transc: { 0: 0, 1: 0, 2: 0, 3: 0 }, equipped: 0, spare: 0,
       slotStats: Object.fromEntries(SLOTS.map((s) => [s, { total: 0, refined: 0 }])) };
     for (const c of CLASS_ORDER) R.byClass[c] = newC();
     for (const p of pieces) {
@@ -399,8 +370,6 @@
       if (R.slotStats[p.slot]) { R.slotStats[p.slot].total++; C.slotStats[p.slot].total++; if (ref) { R.slotStats[p.slot].refined++; C.slotStats[p.slot].refined++; } }
       R.transc[Math.min(3, p.diamonds)]++;
       if (p.equipped) { R.equipped++; C.equipped++; } else { R.spare++; C.spare++; }
-      const lb = R.levels.find((b) => p.level >= b.min && p.level <= b.max); if (lb) lb.n++;
-      R.maxLevel = Math.max(R.maxLevel, p.level);
       (C.slots[p.slot] = C.slots[p.slot] || []).push(p);
       const S = (C.sets[p.set] = C.sets[p.set] || { n: 0, slots: {} });
       S.n++; (S.slots[p.slot] = S.slots[p.slot] || []).push(p);
@@ -408,8 +377,8 @@
     for (const c of Object.keys(R.byClass)) for (const sl of Object.keys(R.byClass[c].slots)) R.byClass[c].slots[sl].sort(pieceOrder);
     return R;
   }
-  // strongest first: level, then diamonds, then refined, then equipped
-  function pieceOrder(a, b) { return b.level - a.level || b.diamonds - a.diamonds || b.refinedCount - a.refinedCount || (b.equipped ? 1 : 0) - (a.equipped ? 1 : 0); }
+  // strongest first: diamonds, then refined, then equipped
+  function pieceOrder(a, b) { return b.diamonds - a.diamonds || b.refinedCount - a.refinedCount || (b.equipped ? 1 : 0) - (a.equipped ? 1 : 0); }
   // Complete sets: for each class, how many full sets (helmet + armor + boots + weapon) can be made from the pieces you own
   function completeSets(pieces) {
     const out = {};
@@ -420,5 +389,71 @@
     return out;
   }
 
-  return { CLASSES, CLASS_ORDER, SLOTS, SLOT_NAME, SETS, SPRITES, FLAG, FLAG_TXT, buildMatcher, readTile, analyze, merge, toPieces, recap, completeSets, isRefined, pieceOrder, LEVEL_BANDS, matchSprite, matchClass, readDiamonds, readLevel, cropTile, norm };
+  // A refined set is one Helmet, Armor, Boots, and Weapon of that class, each refined.
+  // The count is the shortest refined slot, because that slot is what stops the next set.
+  function refinedSets(pieces) {
+    const out = {};
+    for (const c of CLASS_ORDER) {
+      const perSlot = {};
+      for (const sl of SLOTS) perSlot[sl] = pieces.filter((p) => p.cls === c && p.slot === sl && isRefined(p)).length;
+      out[c] = { complete: Math.min(...SLOTS.map((sl) => perSlot[sl])), perSlot };
+    }
+    return out;
+  }
+  // Steps are in order. A later step is not the aim until every earlier step is met.
+  const ADVICE_STEPS = [
+    { aim: "AGI to 3 refined sets", needs: [["AGI", 3]] },
+    { aim: "INT and STR to at least 1 refined set each", needs: [["INT", 1], ["STR", 1]] },
+    { aim: "INT to 4 refined sets, and STR to 2", needs: [["INT", 4], ["STR", 2]] },
+    { aim: "the final goal: STR 5, INT 10, and AGI 3 refined sets", needs: [["STR", 5], ["INT", 10], ["AGI", 3]] },
+  ];
+  const slotList = (slots) => {
+    const names = slots.map((sl) => SLOT_NAME[sl]);
+    if (names.length <= 1) return names[0] || "";
+    if (names.length === 2) return `${names[0]} and ${names[1]}`;
+    return `${names.slice(0, -1).join(", ")}, and ${names[names.length - 1]}`;
+  };
+  // "short 3 + 1 Helmet": the other slots already support 2 sets, so 3 full sets remain to a goal of 5, plus the 1 Helmet that is behind those 2.
+  function gapNote(perSlot, need) {
+    const floor = Math.min(...SLOTS.map((sl) => perSlot[sl]));
+    if (floor >= need) return "done";
+    const above = SLOTS.map((sl) => perSlot[sl]).filter((n) => n > floor);
+    const plateau = above.length ? Math.min(need, Math.min(...above)) : floor;
+    const setsLeft = need - plateau;
+    const extra = SLOTS.filter((sl) => perSlot[sl] < plateau).map((sl) => `${plateau - perSlot[sl]} ${SLOT_NAME[sl]}`).join(", ");
+    if (setsLeft && extra) return `short ${setsLeft} + ${extra}`;
+    if (setsLeft) return `short ${setsLeft}`;
+    return `short ${extra}`;
+  }
+  function advice(pieces) {
+    const owned = refinedSets(pieces);
+    const rowFor = (cls, need) => {
+      const have = owned[cls].complete, perSlot = owned[cls].perSlot;
+      const blocking = SLOTS.filter((sl) => perSlot[sl] < need).sort((a, b) => perSlot[a] - perSlot[b] || SLOTS.indexOf(a) - SLOTS.indexOf(b));
+      return { cls, need, have, short: Math.max(0, need - have), met: have >= need, perSlot, blocking, note: gapNote(perSlot, need) };
+    };
+    const steps = ADVICE_STEPS.map((st, i) => {
+      const rows = st.needs.map(([cls, need]) => rowFor(cls, need));
+      return { step: i + 1, aim: st.aim, rows, met: rows.every((r) => r.met) };
+    });
+    const current = steps.find((s) => !s.met) || null;
+    const finalRows = steps[steps.length - 1].rows;
+    let chase = null;
+    if (current) {
+      const open = current.rows.filter((r) => !r.met);
+      const pick = open.slice().sort((a, b) => b.short - a.short)[0];
+      const floor = Math.min(...pick.blocking.map((sl) => pick.perSlot[sl]));
+      const slots = pick.blocking.filter((sl) => pick.perSlot[sl] === floor);
+      const behind = pick.blocking.filter((sl) => pick.perSlot[sl] > floor);
+      const covered = SLOTS.filter((sl) => pick.perSlot[sl] >= pick.need);
+      chase = {
+        cls: pick.cls, have: pick.have, need: pick.need, short: pick.short, perSlot: pick.perSlot,
+        slots, slotText: slotList(slots), slotHave: floor,
+        behind, behindText: slotList(behind), covered, coveredText: slotList(covered),
+      };
+    }
+    return { owned, steps, current, finalRows, chase, done: !current };
+  }
+
+  return { CLASSES, CLASS_ORDER, SLOTS, SLOT_NAME, SETS, SPRITES, FLAG, FLAG_TXT, buildMatcher, readTile, analyze, merge, toPieces, recap, completeSets, refinedSets, advice, isRefined, pieceOrder, matchSprite, matchClass, readDiamonds, cropTile, norm };
 });

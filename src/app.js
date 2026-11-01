@@ -6,7 +6,7 @@
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const spriteUrl = (id) => `icons/gear/${id}.png`;
 
-  // ---------- reference pictures (12 gear sprites, 3 class icons, 2 diamonds, the digit templates) ----------
+  // ---------- reference pictures (12 gear sprites, 3 class icons, 2 diamonds) ----------
   function loadImage(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
   function toImageData(img) {
     const c = document.createElement("canvas"); c.width = img.naturalWidth || img.width; c.height = img.naturalHeight || img.height;
@@ -23,15 +23,14 @@
       ...["hammer", "bow", "staff"].map(async (c) => { classes[c] = await loadData(`icons/class/${c}.png`); }),
       ...["normal", "refined"].map(async (d) => { diamonds[d] = await loadData(`icons/diamonds/${d}.png`); }),
     ]);
-    const digits = await fetch("data/digits.json", { cache: "no-cache" }).then((r) => r.json());
-    return G.buildMatcher({ sprites, classes, diamonds, digits });
+    return G.buildMatcher({ sprites, classes, diamonds });
   })().catch((e) => { refsError = e; throw e; });
   matcherP.catch(() => {});
 
   // ---------- state ----------
   let items = []; // the editable list of pieces
   let ignored = { skipped: 0, partialRows: 0 };
-  let uid = 0, filter = "check";
+  let uid = 0, filter = "check", adviceOpen = false;
   const open = new Set(["overview"]); // open/closed state of the recap sections survives a re-render
 
   // ---------- picking screenshots ----------
@@ -113,7 +112,7 @@
       for (const t of G.toPieces(merged.tiles)) {
         const rect = analyses[t.src.shot - 1].rows[t.src.row].cols[t.src.col].rect;
         items.push({
-          uid: ++uid, cls: t.cls, set: t.set, slot: t.slot, level: t.level || 0, diamonds: t.diamonds || 0, refinedCount: t.refinedCount || 0, equipped: !!t.equipped,
+          uid: ++uid, cls: t.cls, set: t.set, slot: t.slot, diamonds: t.diamonds || 0, refinedCount: t.refinedCount || 0, equipped: !!t.equipped,
           flags: t.flags.slice(), thumb: cropUrl(sources[t.src.shot - 1], rect), src: t.src,
         });
       }
@@ -121,7 +120,7 @@
       if (ignored.skipped) notes.push({ cls: "muted", text: `Skipped ${pl(ignored.skipped, "tile")} that ${ignored.skipped === 1 ? "is" : "are"} not yellow (Mythic) or empty.` });
       if (!items.length) { finish(notes, "Sorry, I found no yellow (Mythic) gear. Is this your Equipment inventory? You can also add pieces by hand.", true); return; }
       items.sort((a, b) => (b.flags.length > 0) - (a.flags.length > 0)); // unsure pieces first (stable: screenshot order otherwise)
-      filter = items.some((x) => x.flags.length) ? "check" : "all";
+      filter = "check";
       finish(notes, notes.some((n) => n.cls !== "muted") ? "Done, but please read the notes below." : "Done. Check the pieces below, then see your recap.", false);
       $("sec-recap").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
     } catch (e) {
@@ -144,7 +143,6 @@
         <div class="fields">
           <label>Class<select data-f="cls">${CLS.map((c) => opt(c, c, p.cls)).join("")}</select></label>
           <label>Slot<select data-f="slot">${SLOTS.map((s) => opt(s, G.SLOT_NAME[s], p.slot)).join("")}</select></label>
-          <label>Level<input data-f="level" type="number" inputmode="numeric" min="0" max="200" step="1" value="${p.level}"></label>
           <label>Diamonds<select data-f="diamonds">${[0, 1, 2, 3].map((n) => opt(n, n, p.diamonds)).join("")}</select></label>
           <label>Diamond type<select data-f="ref"${p.diamonds ? "" : " disabled"}>${kinds.map(([v, l]) => opt(v, l, refKind(p) === "none" ? "plain" : refKind(p))).join("")}</select></label>
           <label class="eq"><input data-f="equipped" type="checkbox"${p.equipped ? " checked" : ""}> Equipped</label>
@@ -161,12 +159,26 @@
     $("summary").innerHTML = has ? `I found <b>${pl(items.length, "piece")}</b>.${flagged ? ` <b>${flagged}</b> ${flagged === 1 ? "needs" : "need"} a check.` : " Nothing needs a check."}` : "Your pieces will show up here after you read your screenshots.";
     $("fAll").setAttribute("aria-pressed", filter === "all"); $("fCheck").setAttribute("aria-pressed", filter === "check");
     const list = filter === "check" ? items.filter((x) => x.flags.length) : items;
-    $("plist").innerHTML = list.length ? list.map(pieceRow).join("") : has ? `<li class="muted">Nothing needs a check. Switch to All to see every piece.</li>` : "";
+    if (!list.length) { $("plist").innerHTML = has ? `<li class="muted">Nothing needs a check. Switch to All to see every piece.</li>` : ""; return; }
+    const buckets = new Map();
+    for (const p of list) { const k = `${p.cls}|${p.slot}`; if (!buckets.has(k)) buckets.set(k, []); buckets.get(k).push(p); }
+    const html = CLS.map((c) => {
+      const slots = SLOTS.map((s) => {
+        const rows = buckets.get(`${c}|${s}`);
+        if (!rows || !rows.length) return "";
+        const ordered = rows.slice().sort((a, b) => (b.flags.length > 0) - (a.flags.length > 0));
+        return `<section class="slotgrp"><h4>${esc(G.SLOT_NAME[s])}<span class="n">${pl(rows.length, "piece")}</span></h4><ul class="plist sub">${ordered.map(pieceRow).join("")}</ul></section>`;
+      }).join("");
+      if (!slots) return "";
+      const n = SLOTS.reduce((acc, s) => acc + ((buckets.get(`${c}|${s}`) || []).length), 0);
+      return `<li class="clsgrp"><h3>${esc(G.CLASSES[c].name)} (${esc(c)})<span class="n">${pl(n, "piece")}</span></h3>${slots}</li>`;
+    }).join("");
+    $("plist").innerHTML = html;
   }
   $("fAll").addEventListener("click", () => { filter = "all"; renderCheck(); });
   $("fCheck").addEventListener("click", () => { filter = "check"; renderCheck(); });
   $("addItem").addEventListener("click", () => {
-    items.push({ uid: ++uid, cls: "INT", set: "int", slot: "helmet", level: 0, diamonds: 0, refinedCount: 0, equipped: false, flags: [], thumb: null, manual: true });
+    items.push({ uid: ++uid, cls: "INT", set: "int", slot: "helmet", diamonds: 0, refinedCount: 0, equipped: false, flags: [], thumb: null, manual: true });
     filter = "all"; renderAll();
     const li = $("plist").querySelector(`[data-u="${uid}"]`); if (li) li.scrollIntoView({ block: "center" });
   });
@@ -175,7 +187,6 @@
     const f = e.target.dataset.f, p = itemOf(e.target); if (!f || !p) return;
     if (f === "cls") { p.cls = e.target.value; p.set = p.cls.toLowerCase(); }
     else if (f === "slot") p.slot = e.target.value;
-    else if (f === "level") { const v = Math.round(Number(e.target.value)); p.level = Number.isFinite(v) ? Math.max(0, Math.min(200, v)) : 0; e.target.value = p.level; }
     else if (f === "diamonds") { const was = refKind(p) === "refined"; p.diamonds = +e.target.value; p.refinedCount = was ? p.diamonds : 0; } // refined is always the whole tile
     else if (f === "ref") p.refinedCount = e.target.value === "refined" ? p.diamonds : 0;
     else if (f === "equipped") p.equipped = e.target.checked;
@@ -191,7 +202,7 @@
 
   // ---------- Recap ----------
   const gemsHtml = (p) => `<span class="dm" aria-label="${p.diamonds} diamond${p.diamonds === 1 ? "" : "s"}${p.refinedCount ? `, ${p.refinedCount} platinum` : ""}">${[0, 1, 2].map((i) => (i < p.diamonds ? `<span class="${i < p.refinedCount ? "p" : "g"}">\u25c6</span>` : `<span class="o">\u25c7</span>`)).join("")}</span>`;
-  const sig = (p) => [p.level, p.diamonds, p.refinedCount, p.equipped ? 1 : 0].join("|");
+  const sig = (p) => [p.diamonds, p.refinedCount, p.equipped ? 1 : 0].join("|");
   function groupPieces(list) {
     const m = new Map();
     for (const p of list) { const k = sig(p); if (!m.has(k)) m.set(k, { p, n: 0 }); m.get(k).n++; }
@@ -199,7 +210,7 @@
   }
   const pieceLi = ({ p, n }) => {
     const kind = refKind(p);
-    return `<li><span class="ic"><img src="${spriteUrl(p.cls.toLowerCase() + "-" + p.slot)}" alt="" width="34" height="34"></span><div><span class="lv">${p.level ? "+" + p.level : "Level 0"}</span> ${gemsHtml(p)} ${kind === "refined" ? `<span class="chipx ref">Refined</span>` : ""} ${p.equipped ? `<span class="chipx eq">Equipped</span>` : `<span class="chipx spare">Spare</span>`}</div>${n > 1 ? `<span class="mult">\u00d7${n}</span>` : "<span></span>"}</li>`;
+    return `<li><span class="ic"><img src="${spriteUrl(p.cls.toLowerCase() + "-" + p.slot)}" alt="" width="34" height="34"></span><div>${gemsHtml(p)} ${kind === "refined" ? `<span class="chipx ref">Refined</span>` : ""} ${p.equipped ? `<span class="chipx eq">Equipped</span>` : `<span class="chipx spare">Spare</span>`}</div>${n > 1 ? `<span class="mult">\u00d7${n}</span>` : "<span></span>"}</li>`;
   };
   const det = (key, cls, title, n, meta, body) => `<details class="x ${cls}" data-k="${key}"${open.has(key) ? " open" : ""}><summary><span class="t">${esc(title)}</span>${meta ? `<span class="m">${meta}</span>` : ""}<span class="n">${n}</span></summary><div class="body">${body}</div></details>`;
   const barRows = (rows) => { const max = Math.max(1, ...rows.map((r) => r[1])); return rows.map(([l, n]) => `<div class="br"><span>${esc(l)}</span><span class="t"><i style="width:${Math.round((n / max) * 100)}%"></i></span><b>${n}</b></div>`).join(""); };
@@ -211,12 +222,11 @@
   function recapHtml(R) {
     const T = R.total;
     const cls = (c) => R.byClass[c];
-    const tiles = `<div class="tiles"><div class="tile"><div class="k">Pieces</div><div class="v">${T}</div><div class="s">max level +${R.maxLevel}</div></div>${CLS.map((c) => `<div class="tile cls"><div class="k">${c} \u00b7 ${G.CLASSES[c].name}</div><div class="v">${cls(c).total}</div><div class="s">Refined ${cls(c).refined} \u00b7 Equipped ${cls(c).equipped}</div></div>`).join("")}</div>`;
+    const tiles = `<div class="tiles"><div class="tile"><div class="k">Pieces</div><div class="v">${T}</div></div>${CLS.map((c) => `<div class="tile cls"><div class="k">${c} \u00b7 ${G.CLASSES[c].name}</div><div class="v">${cls(c).total}</div><div class="s">Refined ${cls(c).refined} \u00b7 Equipped ${cls(c).equipped}</div></div>`).join("")}</div>`;
     const stats = slotTable(R) + `<div class="stats">
-      <div class="stat"><h4>Refined or not</h4>${barRows([["Refined (platinum)", R.refined], ["Normal (gold)", R.plain], ["No diamonds", R.noDiamonds]])}</div>
+      <div class="stat"><h4>Gear type</h4>${barRows([["Refined (platinum)", R.refined], ["Normal (gold)", R.plain], ["Not yet Upgrade", R.noDiamonds]])}</div>
       <div class="stat"><h4>Transcendence (diamonds)</h4>${barRows([0, 1, 2, 3].map((d) => [d ? "\u25c6".repeat(d) + " (" + d + ")" : "None (0)", R.transc[d]]))}</div>
-      <div class="stat"><h4>Equipped or spare</h4>${barRows([["Equipped", R.equipped], ["Spare", R.spare]])}</div>
-      <div class="stat"><h4>Level</h4>${barRows(R.levels.map((l) => [l.label, l.n]))}</div></div>`;
+      <div class="stat"><h4>Equipped or spare</h4>${barRows([["Equipped", R.equipped], ["Spare", R.spare]])}</div></div>`;
     const sets = G.completeSets(items);
     const setLine = `<p class="hint">Full sets (helmet + armor + boots + weapon of one class): ${CLS.map((c) => `${c} (${G.CLASSES[c].name}) <b>${sets[c].complete}</b>`).join(" \u00b7 ")}</p>`;
     let html = det("overview", "ov", "Overview", T, "", tiles + stats + setLine);
@@ -227,17 +237,38 @@
     }
     return html;
   }
+  function adviceHtml() {
+    const A = G.advice(items);
+    const stepLabel = (s) => s.rows.map((r) => `${r.cls} ${r.need}`).join(" · ");
+    let chase = `<p class="chase"><span class="k">Chase</span> Nothing left</p><p class="sub">You already have the final goal.</p>`;
+    if (A.chase) {
+      const ch = A.chase, more = ch.need - ch.slotHave;
+      const title = ch.slots.length === 1 ? `${ch.cls} ${ch.slotText} · +${more}` : `${ch.cls} · ${ch.slotText}`;
+      const bits = [`${ch.cls} sets ${ch.have}/${ch.need}`];
+      if (ch.covered.length) bits.push(`${ch.coveredText} already enough`);
+      if (ch.behind.length) bits.push("also " + ch.behind.map((sl) => `${G.SLOT_NAME[sl]} ${ch.perSlot[sl]}`).join(", "));
+      chase = `<p class="chase"><span class="k">Chase</span> ${esc(title)}</p><p class="sub">${esc(bits.join(" · "))}</p>`;
+    }
+    const goals = A.finalRows.map((r) => `<li class="${r.met ? "ok" : ""}"><span>${esc(r.cls)}</span><b>${r.have}/${r.need}</b><span>${esc(r.note)}</span></li>`).join("");
+    const steps = A.steps.map((s) => {
+      const now = A.current && s.step === A.current.step;
+      const mark = s.met ? "done" : now ? "now" : "";
+      return `<li class="${s.met ? "ok" : ""}${now ? " now" : ""}"><span class="k">${s.step}</span><span>${esc(stepLabel(s))}</span>${mark ? `<span class="m">${mark}</span>` : ""}</li>`;
+    }).join("");
+    return `<section class="advice" aria-label="Advice"><h3>Advice</h3>${chase}<h4>Goal</h4><ul class="adv-goal">${goals}</ul><h4>Steps</h4><ol class="adv-steps">${steps}</ol><p class="hint">A set is Helmet, Armor, Boots, and Weapon, all refined. The shortest slot stops the next set.</p></section>`;
+  }
   function renderRecap() {
     const el = $("recap");
-    if (!items.length) { el.innerHTML = `<p class="muted">Your recap will show up here.</p>`; return; }
+    if (!items.length) { el.innerHTML = `<p class="muted">Your recap will show up here.</p>`; adviceOpen = false; return; }
     const R = G.recap(items);
-    el.innerHTML = `<div class="bar"><button type="button" id="expAll">Expand all</button><button type="button" id="colAll">Collapse all</button></div>` + recapHtml(R) + shareHtml();
+    el.innerHTML = `<div class="bar"><button type="button" id="expAll">Expand all</button><button type="button" id="colAll">Collapse all</button><button type="button" class="primary" id="adviceBtn" aria-expanded="${adviceOpen ? "true" : "false"}">${adviceOpen ? "Hide advice" : "Get Advice"}</button></div>${adviceOpen ? adviceHtml() : ""}` + recapHtml(R) + shareHtml();
     shareInit();
   }
   $("recap").addEventListener("toggle", (e) => { const d = e.target; if (d && d.matches && d.matches("details.x[data-k]")) { if (d.open) open.add(d.dataset.k); else open.delete(d.dataset.k); if (d.dataset.k === "share" && d.open) shareWarm(); } }, true);
   $("recap").addEventListener("click", (e) => {
     if (e.target.closest("#expAll")) { $("recap").querySelectorAll("details.x").forEach((d) => { d.open = true; }); }
     else if (e.target.closest("#colAll")) { $("recap").querySelectorAll("details.x").forEach((d) => { d.open = false; }); }
+    else if (e.target.closest("#adviceBtn")) { adviceOpen = !adviceOpen; renderRecap(); const b = $("adviceBtn"); if (b) b.focus(); }
   });
   function renderAll() { renderCheck(); renderRecap(); invalidateShare(); }
 
@@ -301,7 +332,7 @@
         const blob = await shareBlob(), file = new File([blob], SHARE_NAME, { type: "image/png" });
         let can = false; try { can = !navigator.canShare || navigator.canShare({ files: [file] }); } catch (err) { can = false; }
         if (!can) { say("This browser cannot share a picture file. Use Download PNG.", { href: lastBlobUrl(blob), text: "Or open the picture and press and hold it to save." }); return; }
-        try { await navigator.share({ files: [file], title: "SOULS Organizer" }); say("Shared."); }
+        try { await navigator.share({ files: [file], title: "SOULS GEAR ADVISOR" }); say("Shared."); }
         catch (err) { say(err && err.name === "AbortError" ? "" : "Could not share the picture. Use Download PNG."); }
       } else {
         const blob = await shareBlob(), url = lastBlobUrl(blob);
