@@ -360,7 +360,7 @@
         const blob = await shareBlob(), file = new File([blob], SHARE_NAME, { type: "image/png" });
         let can = false; try { can = !navigator.canShare || navigator.canShare({ files: [file] }); } catch (err) { can = false; }
         if (!can) { say("This browser cannot share a picture file. Use Download PNG.", { href: lastBlobUrl(blob), text: "Or open the picture and press and hold it to save." }); return; }
-        try { await navigator.share({ files: [file], title: "SOULS GEAR ADVISOR" }); say("Shared."); }
+        try { await navigator.share({ files: [file], title: "SOULS Gear Advisor" }); say("Shared."); }
         catch (err) { say(err && err.name === "AbortError" ? "" : "Could not share the picture. Use Download PNG."); }
       } else {
         const blob = await shareBlob(), url = lastBlobUrl(blob);

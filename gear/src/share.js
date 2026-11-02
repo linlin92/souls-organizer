@@ -27,7 +27,7 @@
     });
     const C = (c) => R.byClass[c];
     return {
-      title: "SOULS GEAR ADVISOR", sub: "Equipment", date: (opts && opts.date) || "", total: pieces.length,
+      title: "SOULS Gear Advisor", sub: "Equipment", date: (opts && opts.date) || "", total: pieces.length,
       stats: {
         byClass: CLASSES.map((c) => ({ cls: c, name: CLASS_NAME[c], total: C(c).total, refined: C(c).refined, plain: C(c).plain, equipped: C(c).equipped, spare: C(c).spare })),
         slotStats: SLOTS.map((sl) => ({ slot: sl, name: SLOT_NAME[sl], all: R.slotStats[sl], byClass: CLASSES.map((c) => R.byClass[c].slotStats[sl]) })),
