@@ -77,7 +77,7 @@
     if (draw) { c.fillStyle = T.bg; c.fillRect(0, 0, W, 8000); const g = c.createLinearGradient(0, 0, 0, 420); g.addColorStop(0, "rgba(227,185,91,.10)"); g.addColorStop(1, "rgba(227,185,91,0)"); c.fillStyle = g; c.fillRect(0, 0, W, 420); }
     // header
     if (draw) {
-      text(m.title, PAD, y + 38, 40, "700", T.ink, '"Palatino Linotype", Palatino, Georgia, serif');
+      text(m.title, PAD, y + 38, 40, "700", T.ink, HEAD);
       text(`${m.sub} \u00b7 ${fmt(m.total)} piece${m.total === 1 ? "" : "s"}`, PAD, y + 76, 24, "500", T.mut);
       if (m.date) text(m.date, W - PAD, y + 38, 20, "500", T.mut, SANS, "right");
     }

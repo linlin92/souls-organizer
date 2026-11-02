@@ -12,15 +12,21 @@ body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Ro
 a{color:var(--gold);text-decoration:none}
 :focus-visible{outline:3px solid #f3d98f;outline-offset:3px}
 .wrap{max-width:880px;margin:0 auto;padding:1.1rem 1rem 3rem}
-.top{display:flex;align-items:center;gap:.7rem;margin-bottom:.2rem}
+.top{display:flex;align-items:center;gap:.7rem;margin-bottom:.2rem;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:.7rem;min-width:0}
 .brand img{width:40px;height:40px;flex:none;object-fit:contain;border-radius:10px}
 h1{margin:0;font-family:"Cinzel","Palatino Linotype",Palatino,Georgia,serif;font-size:1.5rem;font-weight:700;letter-spacing:.02em}
 a.hub{margin-left:auto;flex:none;display:inline-flex;align-items:center;min-height:44px;padding:0 .15rem;font-family:system-ui,sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.tabs{display:inline-flex;padding:3px;gap:3px;border:1px solid var(--line2);border-radius:999px;background:rgba(32,25,18,.85)}
+.tabs a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 1.1rem;border-radius:999px;background:transparent;color:var(--ink);font-size:.92rem;text-decoration:none}
+.tabs a[aria-current=page]{background:var(--gold);color:#1b1208;font-weight:700}
 h2{margin:0 0 .35rem;font-family:"Cinzel","Palatino Linotype",Palatino,Georgia,serif;font-size:1.05rem;color:var(--gold)}
 .card{position:relative;margin:1rem 0;padding:1.05rem 1.1rem;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#271f15,#1c160f)}
-.drop{border:1px dashed var(--line2);border-radius:12px;padding:1.1rem;text-align:center}
-.drop strong{display:block;margin-bottom:.35rem}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;text-align:center;min-height:200px;padding:1rem;border:2px dashed var(--line2);border-radius:12px;background:rgba(0,0,0,.18);cursor:pointer}
+.drop:hover,.drop.over,.drop:focus-within{border-color:var(--gold);background:rgba(227,185,91,.07)}
+.drop svg{color:var(--gold2)} .drop b{font-size:1.02rem} .drop small{font-size:.82rem}
+.btn{min-height:44px;padding:.5rem 1.4rem;border-radius:7px;border:1px solid #f3d98f;background:linear-gradient(180deg,#f0d487,#c99a3b);color:#1b1208;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
 button,input[type=file]{font:inherit}
 button{min-height:44px;padding:0 1rem;border:0;border-radius:999px;background:linear-gradient(180deg,#f0d487,#c99a3b);color:#1b1208;font-weight:700;cursor:pointer}
 button:disabled{opacity:.5}
@@ -64,16 +70,25 @@ button:disabled{opacity:.5}
 .prev{display:block;max-width:100%;height:auto;border:1px solid var(--line2);border-radius:8px;margin-top:.35rem}
 @media (max-width:640px){
   h1{font-size:1.15rem}
+  .tabs{width:100%;justify-content:stretch}
+  .tabs a{flex:1;min-width:0;padding:0 .35rem;font-size:.84rem}
   .brand{gap:.45rem}
   .brand img{width:32px;height:32px}
   .divines{grid-template-columns:1fr}
 }
 </style></head><body>
 <main class="wrap">
-  <header class="top"><div class="brand"><img src="icons/logo.png" alt="" width="40" height="40"><h1>SOULS Rune Advisor</h1></div><a class="hub" href="../">All apps</a></header>
+  <header class="top"><div class="brand"><img src="icons/logo.png" alt="" width="40" height="40"><h1>SOULS Rune Advisor</h1></div><a class="hub" href="../">All apps</a><nav class="tabs" aria-label="Inventory"><a href="../gear/">Equipment</a><a href="../runes/" aria-current="page">Rune</a></nav></header>
   <section class="card">
     <h2>Upload screenshots</h2>
-    <div class="drop" id="drop"><strong>Drag screenshots here</strong><span class="muted">or</span><div style="margin-top:.5rem"><input id="files" type="file" accept="image/png,image/jpeg,image/webp" multiple></div></div>
+    <label class="drop" id="drop" for="files">
+      <input id="files" class="sr" type="file" accept="image/png,image/jpeg,image/webp" multiple>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>
+      <b>Drag and drop your screenshots here</b>
+      <small>or</small>
+      <span class="btn">Select images</span>
+      <small>PNG, JPG or WEBP. You can pick several at once.</small>
+    </label>
     <p><button id="read" type="button">Read screenshots</button></p>
     <p id="status" class="muted" role="status"></p>
   </section>

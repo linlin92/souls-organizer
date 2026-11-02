@@ -49,9 +49,11 @@
   const iconUrl = (id) => (divineIds.has(id) ? "icons/divine/" + id + ".png" : "icons/" + id + ".png");
   $("files").addEventListener("change", () => { picked = [...$("files").files]; $("status").textContent = picked.length ? picked.length + " screenshot" + (picked.length > 1 ? "s" : "") + " ready." : ""; });
   const drop = $("drop");
-  drop.addEventListener("dragover", (e) => { e.preventDefault(); });
+  ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "dragend"].forEach((ev) => drop.addEventListener(ev, () => drop.classList.remove("over")));
   drop.addEventListener("drop", (e) => {
     e.preventDefault();
+    drop.classList.remove("over");
     picked = [...e.dataTransfer.files].filter((f) => /^image\//.test(f.type));
     $("status").textContent = picked.length ? picked.length + " screenshot" + (picked.length > 1 ? "s" : "") + " ready." : "Those files are not images.";
   });
