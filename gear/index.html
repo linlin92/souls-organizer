@@ -163,8 +163,8 @@ details.sub ul{margin:.3rem 0 .6rem 1.1rem;padding:0;font-size:.9rem;color:var(-
 /* ---------- SOULS Organizer ---------- */
 body{padding-bottom:3rem}
 .wrap{max-width:980px;margin:0 auto;padding:0 1rem}
-.top{max-width:980px;margin:0 auto;padding:1rem 1rem .6rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:.7rem} .mark{width:40px;height:40px;flex:none;object-fit:contain;border-radius:10px}
+.top{max-width:980px;margin:0 auto;padding:1rem 1rem .6rem;display:flex;align-items:center;gap:.7rem 1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.7rem} .brand h1{margin:0} .mark{width:40px;height:40px;flex:none;object-fit:contain;border-radius:10px}
 h1{font-family:"Palatino Linotype",Palatino,Georgia,serif;font-size:1.5rem;color:var(--ink);text-shadow:0 2px 0 #000}
 .tabs{display:inline-flex;padding:3px;gap:3px;border:1px solid var(--line2);border-radius:999px;background:rgba(32,25,18,.85)}
 .tabs button{min-height:44px;padding:0 1.1rem;border:0;border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:.92rem}
@@ -275,7 +275,7 @@ ul.pl li{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:.6rem;al
   .brand{gap:.45rem;min-width:0}
   .mark{width:32px;height:32px}
   h1{font-size:1.02rem;line-height:1.15}
-  .tabs{width:100%;justify-content:stretch}
+  .tabs{width:100%;margin-left:0;justify-content:stretch}
   .tabs button{flex:1;min-width:0;padding:0 .35rem;font-size:.84rem}
   .wrap{padding:0 .5rem}
   .cardx{padding:.8rem .65rem}
@@ -327,10 +327,11 @@ ul.pl li{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:.6rem;al
   .hint{overflow-wrap:anywhere}
 }
 @media (prefers-reduced-motion:reduce){details.x>summary::after{transition:none}}
-a.hub{display:block;margin-top:.15rem;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.04em;color:var(--gold);text-decoration:none}a.hub:hover{text-decoration:underline}
+a.hub{margin-left:auto;flex:none;display:inline-flex;align-items:center;min-height:44px;padding:0 .15rem;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.04em;color:var(--gold);text-decoration:none;white-space:nowrap}a.hub:hover{text-decoration:underline}
 </style></head><body>
 <header class="top">
-  <div class="brand"><img class="mark" src="icons/logo.png" alt="" width="40" height="40"><div><h1>SOULS Gear Advisor</h1><a class="hub" href="../">All apps</a></div></div>
+  <div class="brand"><img class="mark" src="icons/logo.png" alt="" width="40" height="40"><h1>SOULS Gear Advisor</h1></div>
+  <a class="hub" href="../">All apps</a>
   <div class="tabs" role="tablist" aria-label="Inventory tab"><button type="button" role="tab" aria-selected="true">Equipment</button><button type="button" role="tab" aria-selected="false" disabled title="Not built yet">Rune <small>soon</small></button></div>
 </header>
 <main class="wrap" id="main">

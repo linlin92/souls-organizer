@@ -1,25 +1,85 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Runes · Lin Souls</title>
-<link rel="icon" type="image/png" href="../artifact/icons/ui/noah.png">
+<title>SOULS Rune Advisor</title>
+<link rel="icon" type="image/png" href="icons/logo.png">
 <style>
 @font-face{font-family:"Cinzel";src:url(../artifact/fonts/cinzel-700.woff2) format("woff2");font-weight:700;font-display:swap}
-:root{--bg:#14100b;--line2:#5a4a2e;--gold:#e3b95b;--ink:#f0e6d2;--mut:#a89a7c}
+:root{--bg:#14100b;--panel:#201912;--line:#4d3f27;--line2:#5a4a2e;--gold:#e3b95b;--gold2:#c99a3b;--ink:#f0e6d2;--mut:#a89a7c;--warn:#ffb35c}
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45;color:var(--ink);
-  background:radial-gradient(1100px 520px at 18% -8%,#2f2214 0,transparent 62%),var(--bg)}
-a{color:var(--gold)}
+  background:radial-gradient(1100px 520px at 18% -8%,#2f2214 0,transparent 62%),repeating-linear-gradient(45deg,rgba(255,255,255,.014) 0 2px,transparent 2px 5px),var(--bg)}
+a{color:var(--gold);text-decoration:none}
 :focus-visible{outline:3px solid #f3d98f;outline-offset:3px}
-.wrap{max-width:640px;margin:0 auto;padding:2.2rem 1.1rem}
-h1{margin:.8rem 0 .4rem;font-family:"Cinzel","Palatino Linotype",Palatino,Georgia,serif;font-size:1.7rem}
-p{color:var(--mut)}
-.back{display:inline-flex;align-items:center;min-height:44px;font-weight:600;text-decoration:none}
-.back:hover{text-decoration:underline}
+.wrap{max-width:880px;margin:0 auto;padding:1.1rem 1rem 3rem}
+.top{display:flex;align-items:center;gap:.7rem;margin-bottom:.2rem}
+.brand{display:flex;align-items:center;gap:.7rem;min-width:0}
+.brand img{width:40px;height:40px;flex:none;object-fit:contain;border-radius:10px}
+h1{margin:0;font-family:"Cinzel","Palatino Linotype",Palatino,Georgia,serif;font-size:1.5rem;font-weight:700;letter-spacing:.02em}
+a.hub{margin-left:auto;flex:none;display:inline-flex;align-items:center;min-height:44px;padding:0 .15rem;font-family:system-ui,sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+h2{margin:0 0 .35rem;font-family:"Cinzel","Palatino Linotype",Palatino,Georgia,serif;font-size:1.05rem;color:var(--gold)}
+.card{position:relative;margin:1rem 0;padding:1.05rem 1.1rem;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#271f15,#1c160f)}
+.drop{border:1px dashed var(--line2);border-radius:12px;padding:1.1rem;text-align:center}
+.drop strong{display:block;margin-bottom:.35rem}
+button,input[type=file]{font:inherit}
+button{min-height:44px;padding:0 1rem;border:0;border-radius:999px;background:linear-gradient(180deg,#f0d487,#c99a3b);color:#1b1208;font-weight:700;cursor:pointer}
+button:disabled{opacity:.5}
+.muted{color:var(--mut)}
+.divines{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin:.7rem 0 .2rem}
+.dline{display:flex;align-items:center;gap:.5rem;min-height:44px;padding:.3rem .55rem;border:1px solid var(--line2);border-radius:10px;background:rgba(0,0,0,.2)}
+.dline img{width:28px;height:28px;object-fit:contain;flex:none}
+.dline b{min-width:1.4rem;font-family:"Cinzel","Palatino Linotype",Palatino,Georgia,serif;font-size:1.25rem;line-height:1;color:var(--gold)}
+.dline span{font-size:.86rem}
+.dline.zero{opacity:.42}
+.dline.zero b{color:var(--mut)}
+.rune{display:grid;grid-template-columns:46px minmax(0,1fr) auto;column-gap:.65rem;row-gap:.35rem;align-items:center;padding:.55rem 0;border-bottom:1px solid rgba(77,63,39,.45)}
+.rune:last-child{border-bottom:0}
+.stone{width:46px;height:46px;grid-row:1 / span 2;object-fit:contain}
+.rune .name{font-weight:650}
+.total{font-family:"Cinzel","Palatino Linotype",Palatino,Georgia,serif;font-size:1.25rem;line-height:1;color:var(--gold)}
+.break{grid-column:2 / -1;display:flex;flex-wrap:wrap;gap:.3rem}
+.chip{display:inline-flex;align-items:center;gap:.28rem;min-height:26px;padding:.08rem .45rem .08rem .28rem;border:1px solid var(--line2);border-radius:999px;background:rgba(0,0,0,.18);font-size:.78rem}
+.chip.basic{padding-left:.5rem}
+.chip img{width:18px;height:18px;object-fit:contain}
+.chip b{color:var(--gold)}
+.check{display:flex;align-items:center;gap:.4rem;padding:.35rem 0;border-bottom:1px solid rgba(77,63,39,.45);font-size:.88rem}
+.check img{width:22px;height:22px;object-fit:contain}
+.check .muted{margin-left:auto}
+.note{color:var(--warn);margin:.4rem 0 0}
+.leftout{margin:.7rem 0 .2rem;border:1px solid rgba(255,179,92,.5);border-radius:10px;background:rgba(255,179,92,.08);color:var(--warn)}
+.leftout summary{cursor:pointer;min-height:44px;display:flex;flex-wrap:wrap;align-items:center;gap:.35rem .55rem;padding:.45rem .75rem;font-weight:650;list-style:none}
+.leftout summary::-webkit-details-marker{display:none}
+.leftout summary::before{content:"";width:.4rem;height:.4rem;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);flex:none}
+.leftout[open] summary::before{transform:rotate(45deg)}
+.leftout .kinds{flex:1 1 16rem;font-weight:500}
+.leftout .body{padding:0 .8rem .65rem 1.7rem}
+.leftout h3{margin:.35rem 0 .15rem;font-family:system-ui,sans-serif;font-size:.82rem;letter-spacing:.03em;color:var(--warn)}
+.leftout ul{margin:0;padding:0;list-style:none}
+.leftout li{margin:0 0 .75rem}
+.leftout .file{display:block;margin:0 0 .25rem;font-size:.82rem;color:var(--mut);overflow-wrap:anywhere}
+.leftout .crop{display:block;width:100%;height:auto;border-radius:6px;border:1px solid rgba(255,179,92,.55);background:#120e08}
+.share{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:.45rem 0 .7rem}
+.share button.ghost{background:transparent;color:var(--gold);border:1px solid var(--line2)}
+.share-msg{flex:1 1 12rem;min-width:0;font-size:.85rem;color:var(--mut)}
+.prev{display:block;max-width:100%;height:auto;border:1px solid var(--line2);border-radius:8px;margin-top:.35rem}
+@media (max-width:640px){
+  h1{font-size:1.15rem}
+  .brand{gap:.45rem}
+  .brand img{width:32px;height:32px}
+  .divines{grid-template-columns:1fr}
+}
 </style></head><body>
 <main class="wrap">
-  <a class="back" href="../">All apps</a>
-  <h1>Runes</h1>
-  <p>The rune organizer is not built yet. Gear and Artifact are ready from the hub.</p>
+  <header class="top"><div class="brand"><img src="icons/logo.png" alt="" width="40" height="40"><h1>SOULS Rune Advisor</h1></div><a class="hub" href="../">All apps</a></header>
+  <section class="card">
+    <h2>Upload screenshots</h2>
+    <div class="drop" id="drop"><strong>Drag screenshots here</strong><span class="muted">or</span><div style="margin-top:.5rem"><input id="files" type="file" accept="image/png,image/jpeg,image/webp" multiple></div></div>
+    <p><button id="read" type="button">Read screenshots</button></p>
+    <p id="status" class="muted" role="status"></p>
+  </section>
+  <section class="card" id="out" hidden></section>
 </main>
+<script src="src/runes.js"></script>
+<script src="src/share.js"></script>
+<script src="src/app.js"></script>
 </body></html>

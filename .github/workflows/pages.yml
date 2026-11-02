@@ -20,6 +20,7 @@ jobs:
           cp hub/index.html public/index.html
           cp hub/logo.png public/logo.png
           cp runes/index.html public/runes/index.html
+          cp -r runes/src runes/icons runes/data public/runes/
           cp artifact/index.html public/artifact/index.html
           cp -r artifact/src artifact/data public/artifact/
           cp gear/index.html public/gear/index.html

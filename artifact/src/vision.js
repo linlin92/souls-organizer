@@ -648,11 +648,12 @@
     return best || { value: null, glyphs: 0, conf: 1 };
   }
   // A sure reading is final. An unsure one (a digit touching a sparkle, pale art or JPEG noise can flip 2<->3 or 8<->6 on a sub-pixel shift of the
-  // tile) is read again with the tile nudged by a fraction of a pixel in 8 directions; the value most of the readings agree on wins, and the
-  // the result always stays flagged as unsure, but now shows the likelier value.
+  // tile) is read again with the tile nudged by a fraction of a pixel in 8 directions; the value most of the readings agree on wins.
+  // A split vote stays flagged. A reading that never changes, or a digit that is clearly one template, does not.
   const JIT = [[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]];
   function readNumber(img, rect, kind, templates) {
     const first = readNumberOnce(img, rect, kind, templates);
+    if (clearDigit(first)) first.conf = Math.max(first.conf, FLAG.numConf);
     if (first.value === null || first.conf >= FLAG.numConf) return first;
     const step = Math.max(0.5, rect.w * 0.006), runs = [first];
     for (let i = 1; i < JIT.length; i++) {
@@ -665,10 +666,15 @@
     for (const v of votes.values()) if (!win || v.w > win.w) win = v;
     const out = Object.assign({}, win.best);
     const agree = win.n / runs.length;
-    out.conf = Math.min(FLAG.numConf * 0.99, win.best.conf * (agree > 0.5 ? 1 : agree)); // a vote only picks the likelier value: it never makes an unsure read sure, so it stays flagged
+    // A sparkle can flip one digit, so a split vote stays unsure. When every nudge reads the same number and that
+    // reading is already close to sure, it is the number (Grip of Hell 7 on a small shot).
+    if (agree === 1 && win.n >= 6 && win.best.conf >= 0.45) out.conf = Math.max(win.best.conf, FLAG.numConf);
+    else out.conf = Math.min(FLAG.numConf * 0.99, win.best.conf * (agree > 0.5 ? 1 : agree)); // a split vote only picks the likelier value: it never makes an unsure read sure
     out.agree = agree;
     return out;
   }
+  // A small compressed digit can sit a little farther from its template and still be unmistakably that digit.
+  function clearDigit(r) { return !!(r && r.cl && r.cl.length && r.cl.every((c) => c.dist <= 0.07 && c.margin >= 0.03)); }
   function isEquipped(img, rect) {
     ({ img, rect } = normTile(img, rect));
     const m = regionMask(img, rect, [0.66, 0.74, 0.92, 0.94], (r, g, b) => Math.max(r, g, b) < 50);
@@ -717,7 +723,13 @@
   // -> { n, unsure }: n = gems counted bottom-up; unsure when the first slot that is not a gem is ambiguous
   function detectDiamonds(img, rect) {
     const t = resample(img, rect.x, rect.y, rect.w, rect.h, DN, DN);
-    const st = DIA_SLOTS.map((cy, k) => slotState(slotMetrics(t, cy), k));
+    const metrics = DIA_SLOTS.map((cy) => slotMetrics(t, cy));
+    const st = metrics.map((m, k) => slotState(m, k));
+    // Diamonds stack without a gap. A clear gem above a strong "maybe" means that lower slot is a gem too
+    // (a small screenshot can leave the middle diamond just over the glow line, as on a 3-diamond Demonic Ring).
+    let top = -1;
+    for (let i = 0; i < st.length; i++) if (st[i] === "yes") top = i;
+    if (top > 0) for (let i = 0; i < top; i++) if (st[i] === "maybe" && metrics[i].inner >= 0.4) st[i] = "yes";
     let n = 0; while (n < 3 && st[n] === "yes") n++;
     // gems stack from the bottom, so whatever sits above an empty slot (icon glow, art) is not a gem and is ignored
     return { n, unsure: n < 3 && st[n] === "maybe", st };
