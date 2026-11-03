@@ -251,7 +251,7 @@
     $("chips").hidden = !has; $("seg").hidden = !has;
     const setChip = (k, n) => { const c = $("chips").querySelector(`[data-k=${k}]`); c.querySelector("b").textContent = n; c.classList.toggle("zero", n === 0); };
     setChip("total", copies); setChip("check", flagged); setChip("ignored", skipped.length);
-    $("summary").innerHTML = has ? `I found <b>${pl(copies, "rune")}</b>.${flagged ? ` <b>${flagged}</b> ${flagged === 1 ? "needs" : "need"} a check.` : " Nothing needs a check."}` : "Your runes will show up here after you read your screenshots.";
+    $("summary").innerHTML = has ? `I found <b>${pl(copies, "rune")}</b>.${flagged ? ` <b>${flagged}</b> ${flagged === 1 ? "needs" : "need"} a check.` : " Nothing needs a check."}` : "";
     $("fAll").setAttribute("aria-pressed", filter === "all"); $("fCheck").setAttribute("aria-pressed", filter === "check");
     const list = filter === "check" ? items.filter((x) => x.flags.length) : items;
     $("skipped").innerHTML = skippedSection(skipped);

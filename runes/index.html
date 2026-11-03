@@ -59,7 +59,7 @@ input[type=checkbox]{min-height:0;width:22px;height:22px;accent-color:var(--gold
 #thumbs .x:hover::before{background:#4a4030}
 #thumbs .fname{display:block;font-size:.72rem;color:var(--mut);margin-top:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #status{color:var(--gold)} #status.err,.err{color:var(--err)} .warn{color:var(--warn)} #notes ul{margin:.3rem 0;padding-left:1.1rem}
-#status:empty,#notes:empty,#rowmsg:empty{display:none}
+#status:empty,#notes:empty,#rowmsg:empty,#summary:empty{display:none}
 #summary{margin:.2rem 0 .6rem;font-size:.95rem}
 #chips{display:flex;gap:.6rem;flex-wrap:wrap;margin:.2rem 0 .8rem}
 .chip{flex:1 1 130px;display:flex;align-items:baseline;gap:.5rem;padding:.55rem .8rem;border:1px solid var(--line2);border-radius:10px;background:#1a140d}
@@ -201,7 +201,7 @@ details.x .body{padding:.2rem .7rem .8rem}
       <small>PNG, JPG or WEBP. You can pick several at once.</small>
     </label>
   </div>
-  <p class="hint"><b>Tip:</b> Keep the first four rows in view. A row hidden behind the "Filter Applied" button, cut off at the edge, or below those four is left out, so scroll a little and overlap your screenshots. Filter the inventory to Legendary and Legend (Mythic Option). Only Legendary runes are read, with or without a Divine.</p>
+  <p class="hint"><b>Tip:</b> Keep the first four rows in view. A row hidden behind the "Filter Applied" button, cut off at the edge, or below those four is left out, so scroll a little and overlap your screenshots. Filter the inventory to Legendary and Legend (Mythic Option). Only Legendary Runes are read, with or without a Divine.</p>
   <p class="priv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>Runs in your browser. Screenshots are not uploaded.</span></p>
   <div id="picked" hidden>
     <div class="picked-h"><b id="pickedCount"></b><button class="link" id="clearAll" type="button">Clear all</button></div>
@@ -213,8 +213,8 @@ details.x .body{padding:.2rem .7rem .8rem}
 </section>
 
 <section class="cardx" id="sec-check" aria-labelledby="h-check" tabindex="-1">
-  <div class="card-h"><span class="num" aria-hidden="true">2</span><div><h2 id="h-check">Check pieces</h2><p class="muted">Fix anything that is wrong. Orange runes need a check. The recap below updates as you edit.</p></div></div>
-  <div id="summary" class="muted">Your runes will show up here after you read your screenshots.</div>
+  <div class="card-h"><span class="num" aria-hidden="true">2</span><div><h2 id="h-check">Check pieces</h2><p class="muted">Fix anything that is wrong. The recap below updates as you edit.</p></div></div>
+  <div id="summary" class="muted"></div>
   <div id="chips" hidden>
     <div class="chip" data-k="total"><b>0</b><span>Runes found</span></div>
     <div class="chip" data-k="check"><b>0</b><span>Need a check</span></div>
@@ -230,7 +230,7 @@ details.x .body{padding:.2rem .7rem .8rem}
 </section>
 
 <section class="cardx" id="sec-recap" aria-labelledby="h-recap">
-  <div class="card-h"><span class="num" aria-hidden="true">3</span><div><h2 id="h-recap">Recap</h2><p class="muted">What you have, by rune and Divine. Tap a section to open it.</p></div></div>
+  <div class="card-h"><span class="num" aria-hidden="true">3</span><div><h2 id="h-recap">Recap</h2><p class="muted">What you have, by Rune and Divine. Tap a section to open it.</p></div></div>
   <div id="recap"><p class="muted">Your recap will show up here.</p></div>
 </section>
 </main>
