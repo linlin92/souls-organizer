@@ -730,6 +730,10 @@
     let top = -1;
     for (let i = 0; i < st.length; i++) if (st[i] === "yes") top = i;
     if (top > 0) for (let i = 0; i < top; i++) if (st[i] === "maybe" && metrics[i].inner >= 0.4) st[i] = "yes";
+    // The same from below: a "maybe" slot right on top of a run of clear gems, with a strong gem of its own (0.40+) and clean right / above / below
+    // (slotState already ruled out a glowing orb), is the next gem. Only a sparkle on the tile's left edge pushed its ring score over the limit
+    // (Grip of Hell with 3 diamonds on a phone screenshot: top gem inner 0.69, ring 0.49, was read as 2).
+    for (let i = 1; i < st.length; i++) if (st[i] === "maybe" && st[i - 1] === "yes" && metrics[i].inner >= 0.4 && metrics[i].ring <= 0.6) st[i] = "yes";
     let n = 0; while (n < 3 && st[n] === "yes") n++;
     // gems stack from the bottom, so whatever sits above an empty slot (icon glow, art) is not a gem and is ignored
     return { n, unsure: n < 3 && st[n] === "maybe", st };

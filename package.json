@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "SOULS Organizer: recap of your Equipment (gear) from inventory screenshots. Runs fully in the browser.",
-  "scripts": { "test": "node --test test/gear.test.js test/share.test.js", "start": "node tools/serve.js", "eval": "node tools/eval-gear.js" },
+  "scripts": { "test": "node --test test/gear.test.js test/share.test.js artifact/test/grip.test.js", "start": "node tools/serve.js", "eval": "node tools/eval-gear.js" },
   "type": "commonjs",
   "devDependencies": { "jpeg-js": "^0.4.4", "playwright-core": "^1.64.1", "pngjs": "^7.0.0" }
 }
