@@ -95,7 +95,15 @@
     }
     let xs = bands(col, Math.max(8, (H / step) * 0.012), Math.max(6, Math.round(W * 0.01)));
     xs = xs.filter((b) => b[1] - b[0] >= W * 0.045);
-    if (xs.length < 2) return [0, W];
+    // A phone screenshot draws a thin gold line on the screen edge, outside the inventory.
+    // That strip is narrower than a tile. Leaving it in keeps every row "on" and the real tiles are missed.
+    const widest = xs.reduce((m, b) => Math.max(m, b[1] - b[0]), 0);
+    xs = xs.filter((b) => {
+      const w = b[1] - b[0];
+      const touches = b[0] <= 4 || b[1] >= W - 4;
+      return !(touches && w < W * 0.12 && w < widest * 0.45);
+    });
+    if (xs.length < 1) return [0, W];
     const groups = [];
     let g = [xs[0]];
     for (let i = 1; i < xs.length; i++) {
@@ -316,16 +324,17 @@
   }
   function matchRune(matcher, img, rect) {
     const N = matcher.N;
-    let best = [];
-    let bestTop = -1;
+    let best = null;
+    let bestTop = -Infinity;
     // the stone sits inside the frame; a one-step nudge covers a slightly off crop
     for (const ox of [-0.04, 0, 0.04]) for (const oy of [-0.04, 0, 0.04]) {
       const shot = inkRaw(resample(img, rect.x + rect.w * (0.22 + ox), rect.y + rect.h * (0.16 + oy), rect.w * 0.56, rect.h * 0.58, N), N);
       const scored = matcher.runes.map((r) => ({ id: r.id, name: r.name, score: inkScore(shot, r, matcher.runeW) }));
+      if (!scored.length) continue;
       const top = Math.max(...scored.map((s) => s.score));
       if (top > bestTop) { bestTop = top; best = scored; }
     }
-    return rank(best);
+    return rank(best || []);
   }
   function matchDivine(matcher, img, rect) {
     const bn = 48;
@@ -446,6 +455,7 @@
         const grade = gradeOf(img, rect);
         if (grade === "other") return;
         const runes = matchRune(matcher, img, rect);
+        if (!runes[0]) return;
         const tile = { row: ri, col: ci, rect, grade, copies: readCopies(img, rect, templates), equipped: equipped(img, rect), flags: [], runeId: runes[0].id, runeName: runes[0].name, runeScore: runes[0].score, runeMargin: runes[0].score - (runes[1] ? runes[1].score : 0) };
         // A bright passing glint can close the gap a little. A high score still names the rune.
         if (tile.runeScore < 0.55 || (tile.runeMargin < 0.08 && tile.runeScore < 0.82)) tile.flags.push("Not sure which rune");
