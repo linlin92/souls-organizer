@@ -19,6 +19,8 @@ jobs:
           mkdir -p public/artifact/icons public/artifact/icons-old public/artifact/icons/ui public/artifact/fonts public/gear public/runes
           cp hub/index.html public/index.html
           cp hub/logo.png public/logo.png
+          mkdir -p public/assets
+          cp hub/assets/*.png public/assets/
           cp runes/index.html public/runes/index.html
           cp -r runes/src runes/icons runes/data public/runes/
           cp artifact/index.html public/artifact/index.html
