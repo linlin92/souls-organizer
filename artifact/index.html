@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en"><head>
-<meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><script>(function(){var m="screenshot",h=location.hash;try{m=localStorage.getItem("souls-mode")==="manual"?"manual":"screenshot"}catch(e){}if(h==="#manual"||h==="#sec-manual")m="manual";else if(/^#(screenshot|sec-upload|sec-check|sec-advice)$/.test(h))m="screenshot";document.documentElement.setAttribute("data-mode",m)})();window.SOULS_V="202611031432"</script><link rel="icon" type="image/png" href="icons/ui/logo.png"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><script>(function(){var m="screenshot",h=location.hash;try{m=localStorage.getItem("souls-mode")==="manual"?"manual":"screenshot"}catch(e){}if(h==="#manual"||h==="#sec-manual")m="manual";else if(/^#(screenshot|sec-upload|sec-check|sec-advice)$/.test(h))m="screenshot";document.documentElement.setAttribute("data-mode",m)})();window.SOULS_V="202611031512"</script><link rel="icon" type="image/png" href="icons/ui/logo.png"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SOULS Artifact Advisor</title>
 <style>
-@font-face{font-family:"Cinzel";src:url(fonts/cinzel-700.woff2?v=202611031432) format("woff2");font-weight:700;font-display:swap}
+@font-face{font-family:"Cinzel";src:url(fonts/cinzel-700.woff2?v=202611031512) format("woff2");font-weight:700;font-display:swap}
 :root{--bg:#14100b;--panel:#201912;--panel2:#2a241b;--line:#4d3f27;--line2:#5a4a2e;--gold:#e3b95b;--gold2:#c99a3b;--ink:#f0e6d2;--mut:#a89a7c;--warn:#ffb35c;--err:#ff8a7a;--ok:#9bd37a;
   --mythic:#dfa856;--legendary:#d98560;--primal:#88e4e0;
   --head:"Cinzel","Trajan Pro","Palatino Linotype","Book Antiqua",Palatino,"Iowan Old Style",Georgia,serif}
@@ -372,7 +372,7 @@ a.hub{margin-left:auto;flex:none;display:inline-flex;align-items:center;min-heig
     </label>
     <figure class="example">
       <figcaption>Example screenshot</figcaption>
-      <img src="icons/ui/example.png?v=202611031432" alt="Example of the Artifact inventory screen" width="420" height="411">
+      <img src="icons/ui/example.png?v=202611031512" alt="Example of the Artifact inventory screen" width="420" height="411">
       <p class="tip"><b>Tip:</b> Open your Inventory and tap the Artifact tab, so every artifact shows its number and Transcendence.</p>
     </figure>
   </div>
@@ -414,7 +414,7 @@ a.hub{margin-left:auto;flex:none;display:inline-flex;align-items:center;min-heig
 <section class="card" id="sec-advice" aria-labelledby="h-advice">
   <div class="card-h"><span class="num" aria-hidden="true">3</span><div><h2 id="h-advice">Get advice</h2><p class="muted">Your best next step, from your artifacts and Dimensional Essences.</p></div></div>
   <div class="opts">
-    <label class="field"><span class="lab"><img class="ai" src="icons/ui/dimensional-essence.png?v=202611031432" alt="" width="22" height="25" style="width:22px;height:25px;border-radius:0">Dimensional Essences</span><input id="essence" type="text" inputmode="numeric" autocomplete="off" value="0"></label>
+    <label class="field"><span class="lab"><img class="ai" src="icons/ui/dimensional-essence.png?v=202611031512" alt="" width="22" height="25" style="width:22px;height:25px;border-radius:0">Dimensional Essences</span><input id="essence" type="text" inputmode="numeric" autocomplete="off" value="0"></label>
     <label class="check"><input type="checkbox" id="pvp"> I play PvP (PvP-Focus artifacts first)</label>
   </div>
   <button class="primary" id="advise" type="button">Get advice</button>
@@ -429,7 +429,7 @@ a.hub{margin-left:auto;flex:none;display:inline-flex;align-items:center;min-heig
   <summary aria-expanded="true">Enter your artifacts</summary>
   <form id="f">
   <fieldset><legend>Dimensional Essences</legend>
-  <label class="field"><span class="lab"><img class="ai" src="icons/ui/dimensional-essence.png?v=202611031432" alt="" width="22" height="25" style="width:22px;height:25px;border-radius:0">Dimensional Essences you have</span><input id="essence2" type="text" inputmode="numeric" autocomplete="off" value="0"></label></fieldset>
+  <label class="field"><span class="lab"><img class="ai" src="icons/ui/dimensional-essence.png?v=202611031512" alt="" width="22" height="25" style="width:22px;height:25px;border-radius:0">Dimensional Essences you have</span><input id="essence2" type="text" inputmode="numeric" autocomplete="off" value="0"></label></fieldset>
   <details class="sub grp" id="grpMythic" open><summary aria-expanded="true">Mythic artifacts you own</summary><div id="mythics"></div></details>
   <details class="sub grp" id="grpLegend" open><summary aria-expanded="true">Legendary copies you have</summary><p class="muted gnote">1◆ = 2 copies, 2◆ = 2 copies + 2 Faded Artifacts, 3◆ = 4 copies + 2 Faded Artifacts. Faded Artifacts are not counted.</p><div id="legs"></div></details>
   <label class="check"><input type="checkbox" id="pvp2"> I play PvP (PvP-Focus artifacts first)</label>
@@ -440,5 +440,5 @@ a.hub{margin-left:auto;flex:none;display:inline-flex;align-items:center;min-heig
 </div>
 <dialog id="prioDlg" aria-labelledby="prioTitle"><div class="dlg-h"><div><h2 id="prioTitle">Priority List</h2><p class="muted">A view-only guide to the whole list, in order. It is my opinion, not a must-follow list.</p></div><button type="button" class="dlg-x" id="prioClose" aria-label="Close"><svg class="xi" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div><div id="prioBody" class="dlg-b" tabindex="0"></div></dialog>
 <button type="button" class="totop" id="toTop" aria-label="Back to top" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 15 7-7 7 7"/></svg></button>
-<script src="src/advisor.js?v=202611031432"></script><script src="src/vision.js?v=202611031432"></script><script src="src/share.js?v=202611031432"></script><script src="src/app.js?v=202611031432"></script>
+<script src="src/advisor.js?v=202611031512"></script><script src="src/vision.js?v=202611031512"></script><script src="src/share.js?v=202611031512"></script><script src="src/app.js?v=202611031512"></script>
 </body></html>
