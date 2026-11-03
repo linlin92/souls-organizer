@@ -6,6 +6,9 @@ const fs = require("fs"), path = require("path");
 const files = [
   path.join(__dirname, "..", "index.html"),
   path.join(__dirname, "..", "..", "runes", "index.html"),
+  path.join(__dirname, "..", "..", "gear", "index.html"),
+  path.join(__dirname, "..", "..", "hub", "index.html"),
+  path.join(__dirname, "..", "..", "index.html"),
 ];
 let v = process.argv[2];
 if (!v) {
@@ -14,8 +17,8 @@ if (!v) {
 }
 for (const file of files) {
   let html = fs.readFileSync(file, "utf8");
-  const next = html.replace(/window\.SOULS_V="[^"]*"/g, `window.SOULS_V="${v}"`).replace(/(\.(?:js|png|woff2))\?v=[\w.-]+/g, `$1?v=${v}`);
-  if (next === html || !next.includes(`window.SOULS_V="${v}"`)) throw new Error("no version markers in " + file);
+  const next = html.replace(/window\.SOULS_V="[^"]*"/g, `window.SOULS_V="${v}"`).replace(/(\.(?:js|css|png|jpe?g|webp|woff2|mp4|webm))\?v=[\w.-]+/g, `$1?v=${v}`);
+  if (next === html || (!next.includes(`window.SOULS_V="${v}"`) && !next.includes(`?v=${v}`))) throw new Error("no version markers in " + file);
   fs.writeFileSync(file, next);
 }
 console.log("version", v);

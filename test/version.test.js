@@ -15,4 +15,10 @@ test("rune scripts use the artifact page cache version", () => {
   for (const src of ["src/runes.js", "src/share.js", "src/app.js", "icons/logo.png", "../gear/fonts/cinzel-700.woff2"]) {
     assert.ok(rune.includes(`${src}?v=${v}`), `${src} is not versioned with ${v}`);
   }
+  for (const rel of ["hub/index.html", "gear/index.html", "runes/index.html", "artifact/index.html", "index.html"]) {
+    const html = fs.readFileSync(path.join(root, rel), "utf8");
+    for (const file of ["bg.mp4", "bg.webm", "bg-poster.jpg", "bg.css", "bg.js"]) {
+      assert.ok(html.includes(`${file}?v=${v}`), `${rel} does not version ${file} with ${v}`);
+    }
+  }
 });

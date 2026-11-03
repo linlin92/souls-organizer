@@ -21,6 +21,7 @@ jobs:
           cp hub/logo.png public/logo.png
           mkdir -p public/assets
           cp hub/assets/*.png public/assets/
+          cp assets/bg.mp4 assets/bg.webm assets/bg-poster.jpg assets/bg.css assets/bg.js public/assets/
           cp runes/index.html public/runes/index.html
           cp -r runes/src runes/icons runes/data public/runes/
           cp artifact/index.html public/artifact/index.html
