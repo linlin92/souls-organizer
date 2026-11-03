@@ -17,7 +17,7 @@
   // pieces: [{cls, slot, diamonds, refinedCount, equipped}]; R: Gear.recap(pieces)
   function model(pieces, R, opts) {
     // The top refinedCount diamonds are icy. The ones below them stay gold (+2 refined = 2 icy, 1 gold).
-    const tile = (p) => { const d = Math.min(3, p.diamonds || 0), refinedCount = Math.min(d, p.refinedCount || 0); return { sprite: spriteId(p), diamonds: d, refinedCount, refined: refinedCount > 0, equipped: !!p.equipped }; };
+    const tile = (p) => { const d = Math.min(3, p.diamonds || 0), refinedCount = Math.min(d, p.refinedCount || 0); return { sprite: spriteId(p), diamonds: d, refinedCount, refined: refinedCount > 0, equipped: !!p.equipped, crop: p.thumb || p.crop || "" }; };
     const classes = CLASSES.map((cls) => {
       const mine = pieces.filter((p) => p.cls === cls);
       return {
@@ -161,12 +161,71 @@
     y += 70;
     return y;
   }
-  // browser: loads the sprites (same origin) and draws. spriteUrl(id) -> URL. Resolves a canvas.
+  // Pictures the share image is built from. Sprites are drawn on each tile. Class icons, diamond icons, and the
+  // tile crops cut from the uploaded screenshots are decoded too, so a late decode cannot blank an icon.
+  function assetSrcs(m, o) {
+    o = o || {};
+    const srcs = [];
+    if (o.spriteUrl) (m.spriteIds || []).forEach((id) => srcs.push(o.spriteUrl(id)));
+    if (o.classUrl) ["hammer", "bow", "staff"].forEach((id) => srcs.push(o.classUrl(id)));
+    if (o.diamondUrl) ["normal", "refined"].forEach((id) => srcs.push(o.diamondUrl(id)));
+    (o.crops || []).forEach((src) => srcs.push(src));
+    (m.classes || []).forEach((k) => (k.slots || []).forEach((sl) => (sl.tiles || []).forEach((t) => { if (t && t.crop) srcs.push(t.crop); })));
+    return [...new Set(srcs.filter(Boolean))];
+  }
+  const LOAD_MS = 10000;
+  // decode() is the real "the pixels are ready to draw" signal. onload can fire before that, and drawImage then paints nothing.
+  // Fall back to onload/onerror. Give up after ~10s. A failed image is tried once more (a new request, so a cached error is not reused).
+  function loadImageOnce(src) {
+    return new Promise((resolve) => {
+      if (!src) { resolve(null); return; }
+      const img = new Image();
+      let settled = false;
+      const finish = (v) => { if (settled) return; settled = true; clearTimeout(timer); img.onload = null; img.onerror = null; resolve(v); };
+      const timer = setTimeout(() => finish(null), LOAD_MS);
+      const afterLoad = () => {
+        if (!(img.naturalWidth > 0)) { finish(null); return; }
+        if (typeof img.decode !== "function") { finish(img); return; }
+        img.decode().then(() => finish(img)).catch(() => finish(img));
+      };
+      img.onload = afterLoad;
+      img.onerror = () => finish(null);
+      img.src = src;
+      if (img.complete) afterLoad();
+    });
+  }
+  function retrySrc(src) {
+    if (!src || /^(data|blob):/i.test(src)) return src;
+    return src + (src.includes("?") ? "&" : "?") + "retry=1";
+  }
+  async function loadImage(src) {
+    const first = await loadImageOnce(src);
+    if (first) return first;
+    return loadImageOnce(retrySrc(src));
+  }
+  async function loadAll(srcs) {
+    const map = new Map();
+    await Promise.all(srcs.map(async (src) => { map.set(src, await loadImage(src)); }));
+    return map;
+  }
+  async function waitFonts() {
+    const fonts = document.fonts;
+    if (!fonts) return;
+    // Request the faces the canvas actually draws (the big totals are Cinzel). ready can resolve before a face is used.
+    try {
+      if (fonts.load) await Promise.all([
+        fonts.load('700 40px "Cinzel"'), fonts.load('700 46px "Cinzel"'), fonts.load("700 24px " + SANS), fonts.load("800 21px " + SANS),
+      ]);
+    } catch (e) { /* the fallback serif / system font is used */ }
+    try { await fonts.ready; } catch (e) { /* draw with whatever is ready */ }
+  }
+  // browser: decodes every picture, waits for fonts, then paints once. spriteUrl(id) -> URL. Resolves a canvas.
   async function render(m, o) {
     const T = o.theme || themeFromCss();
-    const load = (src) => new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
-    if (document.fonts && document.fonts.load) { try { await Promise.all([document.fonts.load('700 40px "Cinzel"'), document.fonts.load("700 24px " + SANS)]); } catch (e) { /* the fallback serif is used */ } }
-    const imgs = {}; await Promise.all(m.spriteIds.map(async (id) => { imgs[id] = await load(o.spriteUrl(id)); }));
+    const srcs = assetSrcs(m, o);
+    const [loaded] = await Promise.all([loadAll(srcs), waitFonts()]);
+    const imgs = {};
+    (m.spriteIds || []).forEach((id) => { imgs[id] = (o.spriteUrl && loaded.get(o.spriteUrl(id))) || null; });
     const cv = document.createElement("canvas"); cv.width = W; cv.height = 10; let c = cv.getContext("2d");
     const H = Math.ceil(paint(c, T, m, imgs, false));
     cv.width = W; cv.height = H; c = cv.getContext("2d"); c.imageSmoothingQuality = "high";
@@ -174,5 +233,5 @@
     return cv;
   }
   const toBlob = (cv) => new Promise((res, rej) => cv.toBlob((b) => (b ? res(b) : rej(new Error("The picture could not be made"))), "image/png"));
-  return { WIDTH: W, TILE, model, render, toBlob, themeFromCss, DEFAULT_THEME, fmt, perRow, spriteId };
+  return { WIDTH: W, TILE, model, render, toBlob, themeFromCss, DEFAULT_THEME, fmt, perRow, spriteId, assetSrcs, loadImage };
 });
