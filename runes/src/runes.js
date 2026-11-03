@@ -84,28 +84,77 @@
     }
     return out;
   }
+  // A phone screenshot has gold down the edge of the screen, outside the inventory. Count tiles inside the panel only.
+  function panelSpan(img) {
+    const W = img.width, H = img.height, D = img.data;
+    const col = new Float32Array(W);
+    const step = H > 900 ? 2 : 1;
+    for (let y = 0; y < H; y += step) for (let x = 0; x < W; x++) {
+      const i = (y * W + x) * 4;
+      if (isFrame(D[i], D[i + 1], D[i + 2])) col[x]++;
+    }
+    let xs = bands(col, Math.max(8, (H / step) * 0.012), Math.max(6, Math.round(W * 0.01)));
+    xs = xs.filter((b) => b[1] - b[0] >= W * 0.045);
+    if (xs.length < 2) return [0, W];
+    const groups = [];
+    let g = [xs[0]];
+    for (let i = 1; i < xs.length; i++) {
+      const gap = xs[i][0] - g[g.length - 1][1];
+      const wide = Math.max(g[g.length - 1][1] - g[g.length - 1][0], xs[i][1] - xs[i][0]);
+      if (gap < wide * 0.42) g.push(xs[i]);
+      else { groups.push(g); g = [xs[i]]; }
+    }
+    groups.push(g);
+    groups.sort((a, b) => (b[b.length - 1][1] - b[0][0]) - (a[a.length - 1][1] - a[0][0]));
+    const best = groups[0];
+    return [Math.max(0, best[0][0] - 6), Math.min(W, best[best.length - 1][1] + 6)];
+  }
+  function frameSpan(img, y0, y1, x0, x1) {
+    const W = img.width, D = img.data;
+    let a = W, z = 0;
+    for (let y = y0; y < y1; y += 2) for (let x = x0; x < x1; x += 2) {
+      const i = (y * W + x) * 4;
+      if (isFrame(D[i], D[i + 1], D[i + 2])) { if (x < a) a = x; if (x > z) z = x; }
+    }
+    return z > a ? z - a : 0;
+  }
   function findGrid(img) {
     const W = img.width, H = img.height, D = img.data;
+    const span = panelSpan(img);
+    const spanW = span[1] - span[0];
     const row = new Float32Array(H);
     for (let y = 0; y < H; y++) {
       let n = 0;
-      for (let x = 0; x < W; x++) { const i = (y * W + x) * 4; if (isFrame(D[i], D[i + 1], D[i + 2])) n++; }
+      for (let x = span[0]; x < span[1]; x++) { const i = (y * W + x) * 4; if (isFrame(D[i], D[i + 1], D[i + 2])) n++; }
       row[y] = n;
     }
-    let ys = bands(row, Math.max(8, W * 0.015), 8);
+    const ys = bands(row, Math.max(8, spanW * 0.02), 8);
     if (ys.length < 2) return null;
-    const tall = ys.filter((b) => b[1] - b[0] >= 28);
+    const tall = ys.filter((b) => b[1] - b[0] >= Math.max(28, H * 0.012));
     if (tall.length < 2) return null;
-    const heights = tall.map((b) => b[1] - b[0]).sort((a, b) => a - b);
-    const med = heights[heights.length >> 1];
-    const full = tall.filter((b) => { const h = b[1] - b[0]; return h > med * 0.85 && h < med * 1.2; });
-    const cutBands = tall.filter((b) => { const h = b[1] - b[0]; return h > med * 0.4 && h <= med * 0.85; });
+    // Buttons under the grid are shorter, and one glued pair of rows is taller. The height that repeats is a tile.
+    const clusters = [];
+    for (const b of tall) {
+      const h = b[1] - b[0];
+      const c = clusters.find((k) => Math.abs(k.h - h) < k.h * 0.18);
+      if (c) { c.n++; c.sum += h; c.h = c.sum / c.n; }
+      else clusters.push({ h, n: 1, sum: h });
+    }
+    clusters.sort((a, b) => (b.n * b.n * b.h) - (a.n * a.n * a.h));
+    const med = clusters[0].h;
+    const full = tall.filter((b) => { const h = b[1] - b[0]; return h > med * 0.80 && h < med * 1.28; });
     if (!full.length) return null;
+    const rowW = Math.max(...full.map((b) => frameSpan(img, b[0], b[1], span[0], span[1])));
+    const cutBands = tall.filter((b) => {
+      const h = b[1] - b[0];
+      // A short band is a cropped rune row only when it is as wide as the grid. The Filter button is narrower.
+      return h > med * 0.4 && h <= med * 0.80 && frameSpan(img, b[0], b[1], span[0], span[1]) > rowW * 0.62;
+    });
     // The upper half of the frame. The top edge alone misses a column, and the red symbol lower down can glue two tiles together.
     const col = new Float32Array(W);
     for (const b of full) {
       const y1 = b[0] + Math.max(4, (b[1] - b[0]) * 0.5);
-      for (let y = b[0]; y < y1; y++) for (let x = 0; x < W; x++) {
+      for (let y = b[0]; y < y1; y++) for (let x = span[0]; x < span[1]; x++) {
         const i = (y * W + x) * 4;
         if (isFrame(D[i], D[i + 1], D[i + 2])) col[x]++;
       }
