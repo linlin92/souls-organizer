@@ -209,7 +209,7 @@
         return;
       }
       items.sort((a, b) => (b.flags.length > 0) - (a.flags.length > 0));
-      filter = items.some((x) => x.flags.length) ? "check" : "all";
+      filter = "check";
       if (skipped.length) skippedOpen = true;
       finish(notes, notes.some((n) => n.cls !== "muted") ? "Done, but please read the notes below." : "Done. Check the runes below, then see your recap.", false);
       const dest = $("sec-check");
@@ -254,9 +254,12 @@
     setChip("total", copies); setChip("check", flagged); setChip("ignored", skipped.length);
     $("summary").innerHTML = has ? `I found <b>${pl(copies, "rune")}</b>.${flagged ? ` <b>${flagged}</b> ${flagged === 1 ? "needs" : "need"} a check.` : " Nothing needs a check."}` : "";
     $("fAll").setAttribute("aria-pressed", filter === "all"); $("fCheck").setAttribute("aria-pressed", filter === "check");
+    const ready = has && flagged === 0;
+    $("checkNext").hidden = !ready;
+    $("checkNextMsg").textContent = ready ? "All checked. Your list is ready." : "";
     const list = filter === "check" ? items.filter((x) => x.flags.length) : items;
     $("skipped").innerHTML = skippedSection(skipped);
-    if (!list.length) { $("plist").innerHTML = has ? `<li class="muted">Nothing needs a check. Switch to All to see every rune.</li>` : ""; return; }
+    if (!list.length) { $("plist").innerHTML = has ? `<li class="muted">Nothing needs a check.</li>` : ""; return; }
     const buckets = new Map();
     for (const p of list) { if (!buckets.has(p.runeId)) buckets.set(p.runeId, []); buckets.get(p.runeId).push(p); }
     const order = [...buckets.keys()].sort((a, b) => (runeById(a) ? runeById(a).name : a).localeCompare(runeById(b) ? runeById(b).name : b));
@@ -296,6 +299,7 @@
       $("sec-recap").scrollIntoView({ behavior, block: "start" });
     }
   }
+  $("goRecap").addEventListener("click", () => { $("sec-recap").scrollIntoView({ behavior: scrollBehavior(), block: "start" }); });
   $("fAll").addEventListener("click", () => { filter = "all"; renderCheck(); });
   $("fCheck").addEventListener("click", () => { filter = "check"; renderCheck(); });
   $("addItem").addEventListener("click", () => {
