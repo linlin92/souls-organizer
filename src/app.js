@@ -292,7 +292,7 @@
     el.innerHTML = `<div class="bar"><button type="button" id="expAll">Expand all</button><button type="button" id="colAll">Collapse all</button><button type="button" class="primary" id="adviceBtn" aria-expanded="${adviceOpen ? "true" : "false"}">${adviceOpen ? "Hide advice" : "Get Advice"}</button></div>${adviceOpen ? adviceHtml() : ""}` + recapHtml(R) + shareHtml();
     shareInit();
   }
-  $("recap").addEventListener("toggle", (e) => { const d = e.target; if (d && d.matches && d.matches("details.x[data-k]")) { if (d.open) open.add(d.dataset.k); else open.delete(d.dataset.k); if (d.dataset.k === "share" && d.open) shareWarm(); } }, true);
+  $("recap").addEventListener("toggle", (e) => { const d = e.target; if (d && d.matches && d.matches("details.x[data-k]")) { if (d.open) open.add(d.dataset.k); else open.delete(d.dataset.k); if (d.dataset.k === "share" && d.open) sharePrepare(); } }, true);
   $("recap").addEventListener("click", (e) => {
     if (e.target.closest("#expAll")) { $("recap").querySelectorAll("details.x").forEach((d) => { d.open = true; }); }
     else if (e.target.closest("#colAll")) { $("recap").querySelectorAll("details.x").forEach((d) => { d.open = false; }); }
@@ -303,8 +303,8 @@
   // ---------- share image: a PNG of the recap for Discord (canvas in the browser, no network) ----------
   // Share is offered whenever the browser has navigator.share (the files check happens on the click, with the real picture, because some browsers only answer
   // canShare({files}) truthfully for a real image). Copy only where an image can really be put on the clipboard (and it is hidden after a refusal).
-  // The picture is drawn ahead of time (when the section opens) and kept, so a tap on Copy / Share / Download needs no drawing time and the
-  // browser's "user just clicked" permission is still valid.
+  // The picture is prepared when this section is open. Share, Copy, and Download stay disabled, with "Preparing image…", until the fonts and
+  // pictures have loaded and one new canvas has been drawn. Each action draws again, so a canvas or blob from before that is never reused.
   const NATIVE_OK = typeof navigator.share === "function";
   const COPY_OK = (() => {
     try {
@@ -315,55 +315,94 @@
   })();
   let COPY_BROKEN = false;
   const SHARE_NAME = "souls-organizer-equipment.png";
-  let LAST = { blob: null, previewUrl: null };
+  const PREPARING = "Preparing image\u2026";
+  let previewUrl = null;
+  let warmGen = 0;
   let warmTimer = 0;
   const shareHtml = () => `<details class="x" data-k="share"${open.has("share") ? " open" : ""}><summary><span class="t">Share image</span><span class="m">for Discord</span><span class="n">PNG</span></summary><div class="body">
     <p class="hint">One picture with the totals and every piece, to keep track in Discord.</p>
-    <div class="share" role="group" aria-label="Share the recap as a picture"><button type="button" class="primary" data-share="native" hidden>Share image</button><button type="button" data-share="copy" hidden>Copy image</button><button type="button" data-share="dl">Download PNG</button><span class="share-msg" role="status" aria-live="polite"></span></div>
+    <div class="share" role="group" aria-label="Share the recap as a picture"><button type="button" class="primary" data-share="native" hidden disabled>Share image</button><button type="button" data-share="copy" hidden disabled>Copy image</button><button type="button" data-share="dl" disabled>Download PNG</button><span class="share-msg" role="status" aria-live="polite">${PREPARING}</span></div>
     <img class="prev" id="sharePrev" alt="Preview of the share image" hidden></div></details>`;
+  function shareButtons(disabled) { const root = $("recap"); if (root) root.querySelectorAll("[data-share]").forEach((b) => { b.disabled = disabled; }); }
   function shareInit() {
     $("recap").querySelectorAll('[data-share="native"]').forEach((b) => { b.hidden = !NATIVE_OK; });
     $("recap").querySelectorAll('[data-share="copy"]').forEach((b) => { b.hidden = !COPY_OK || COPY_BROKEN; });
-    if (open.has("share")) shareWarm();
+    if (open.has("share")) sharePrepare();
   }
-  function invalidateShare() { LAST.blob = null; if (LAST.previewUrl) { URL.revokeObjectURL(LAST.previewUrl); LAST.previewUrl = null; } clearTimeout(warmTimer); if (open.has("share") && items.length) warmTimer = setTimeout(() => shareWarm(), 400); }
-  function shareBlob() {
+  function clearPreview() {
+    if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
+    const im = $("sharePrev"); if (im) { im.removeAttribute("src"); im.hidden = true; }
+  }
+  function showPreview(blob) {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(blob);
+    const im = $("sharePrev"); if (im) { im.src = previewUrl; im.hidden = false; }
+  }
+  // A new canvas and blob every call. Nothing is kept to be drawn again.
+  function makeShare() {
     if (!items.length) return Promise.reject(new Error("Read your screenshots first"));
-    if (LAST.blob) return LAST.blob;
     const m = Share.model(items, G.recap(items), { date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) });
-    const p = Share.render(m, { spriteUrl }).then(Share.toBlob);
-    LAST.blob = p; p.catch(() => { if (LAST.blob === p) LAST.blob = null; });
-    p.then((b) => { if (LAST.blob !== p) return; if (LAST.previewUrl) URL.revokeObjectURL(LAST.previewUrl); LAST.previewUrl = URL.createObjectURL(b); const im = $("sharePrev"); if (im) { im.src = LAST.previewUrl; im.hidden = false; } }).catch(() => {});
-    return p;
+    return Share.render(m, { spriteUrl, classUrl: (id) => `icons/class/${id}.png`, diamondUrl: (id) => `icons/diamonds/${id}.png` }).then(Share.toBlob);
   }
-  function shareWarm() { try { shareBlob().catch(() => {}); } catch (e) { /* the click will say what went wrong */ } }
+  function sharePrepare() {
+    if (!items.length) return;
+    const token = ++warmGen;
+    shareButtons(true);
+    const msg = $("recap") && $("recap").querySelector(".share-msg");
+    shareSay(msg, PREPARING);
+    const im = $("sharePrev"); if (im) im.hidden = true;
+    makeShare().then((blob) => {
+      if (token !== warmGen) return;
+      showPreview(blob);
+      const m = $("recap") && $("recap").querySelector(".share-msg");
+      if (m && m.textContent === PREPARING) shareSay(m, "");
+      shareButtons(false);
+    }).catch(() => {
+      if (token !== warmGen) return;
+      const m = $("recap") && $("recap").querySelector(".share-msg");
+      if (m && m.textContent === PREPARING) shareSay(m, "");
+      shareButtons(false);
+    });
+  }
+  function invalidateShare() {
+    ++warmGen; clearPreview(); clearTimeout(warmTimer);
+    if (open.has("share") && items.length) {
+      shareButtons(true);
+      const msg = $("recap") && $("recap").querySelector(".share-msg");
+      shareSay(msg, PREPARING);
+      warmTimer = setTimeout(() => sharePrepare(), 400);
+    }
+  }
   let SHARE_URL = null;
   function shareSay(msg, text, link) {
     if (!msg) return; msg.textContent = text || "";
     if (link) { const a = document.createElement("a"); a.href = link.href; a.target = "_blank"; a.rel = "noopener"; a.textContent = link.text; msg.append(" ", a); }
   }
   document.addEventListener("click", async (e) => {
-    const b = e.target.closest("[data-share]"); if (!b) return;
+    const b = e.target.closest("[data-share]"); if (!b || b.disabled) return;
     const msg = b.parentElement.querySelector(".share-msg"), say = (t, l) => shareSay(msg, t, l);
-    const act = b.dataset.share; b.disabled = true; say("Making the picture\u2026");
+    const act = b.dataset.share;
+    const token = ++warmGen;
+    shareButtons(true); say("Making the picture\u2026");
     const lastBlobUrl = (blob) => { if (SHARE_URL) URL.revokeObjectURL(SHARE_URL); SHARE_URL = URL.createObjectURL(blob); return SHARE_URL; };
+    const keep = (blob) => { if (token === warmGen) showPreview(blob); return blob; };
     try {
       if (act === "copy") {
         // the Blob goes in as a promise (made inside the click) so Chrome and Safari keep the click's permission while the picture is drawn
-        try { await navigator.clipboard.write([new ClipboardItem({ "image/png": shareBlob() })]); say("Copied. Paste it into Discord."); }
+        try { await navigator.clipboard.write([new ClipboardItem({ "image/png": makeShare().then(keep) })]); say("Copied. Paste it into Discord."); }
         catch (err) {
           if (err && err.name === "AbortError") { say(""); return; }
           COPY_BROKEN = true; document.querySelectorAll('[data-share="copy"]').forEach((x) => { x.hidden = true; });
           say("This browser does not let a page copy a picture. Use Download PNG" + (NATIVE_OK ? " or Share image." : "."));
         }
       } else if (act === "native") {
-        const blob = await shareBlob(), file = new File([blob], SHARE_NAME, { type: "image/png" });
+        const blob = keep(await makeShare()), file = new File([blob], SHARE_NAME, { type: "image/png" });
         let can = false; try { can = !navigator.canShare || navigator.canShare({ files: [file] }); } catch (err) { can = false; }
         if (!can) { say("This browser cannot share a picture file. Use Download PNG.", { href: lastBlobUrl(blob), text: "Or open the picture and press and hold it to save." }); return; }
         try { await navigator.share({ files: [file], title: "SOULS Gear Advisor" }); say("Shared."); }
         catch (err) { say(err && err.name === "AbortError" ? "" : "Could not share the picture. Use Download PNG."); }
       } else {
-        const blob = await shareBlob(), url = lastBlobUrl(blob);
+        const blob = keep(await makeShare()), url = lastBlobUrl(blob);
         if ("download" in HTMLAnchorElement.prototype) {
           const a = document.createElement("a"); a.href = url; a.download = SHARE_NAME; document.body.appendChild(a); a.click(); a.remove();
           say("Saved as " + SHARE_NAME + ".", { href: url, text: "Nothing saved? Open the picture and press and hold it." });
@@ -371,7 +410,7 @@
       }
     } catch (err) {
       say("Could not make the picture" + (err && err.message ? " (" + err.message + ")" : "") + ". Please try again.");
-    } finally { b.disabled = false; }
+    } finally { if (token === warmGen) shareButtons(false); }
   });
 
   // for tests and the preview script
