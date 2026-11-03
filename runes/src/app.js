@@ -151,7 +151,7 @@
       return `<h3>${esc(SKIP_LABEL[kind] || kind)}</h3><ul>${files}</ul>`;
     }).join("");
     const summary = kinds.map((k) => SKIP_LABEL[k] || k).join(" · ");
-    return `<details class="leftout"${skippedOpen ? " open" : ""}><summary>Skipped runes <span class="kinds">${esc(summary)}</span></summary><div class="body">${groups}</div></details>`;
+    return `<details class="leftout"${skippedOpen ? " open" : ""}><summary>Skipped Runes <span class="kinds">${esc(summary)}</span></summary><div class="body">${groups}</div></details>`;
   }
   $("skipped").addEventListener("toggle", (e) => { const d = e.target; if (d && d.matches && d.matches("details.leftout")) skippedOpen = d.open; }, true);
 
@@ -209,7 +209,8 @@
         return;
       }
       items.sort((a, b) => (b.flags.length > 0) - (a.flags.length > 0));
-      filter = "check";
+      filter = items.some((x) => x.flags.length) ? "check" : "all";
+      if (skipped.length) skippedOpen = true;
       finish(notes, notes.some((n) => n.cls !== "muted") ? "Done, but please read the notes below." : "Done. Check the runes below, then see your recap.", false);
       const dest = $("sec-check");
       dest.focus({ preventScroll: true });
@@ -267,6 +268,34 @@
       return `<li class="clsgrp"><h3><img src="icons/${esc(id)}.png" alt="">${esc(name)}<span class="n">${pl(n, "rune")}</span></h3><ul class="plist">${ordered.map(pieceRow).join("")}</ul></li>`;
     }).join("");
   }
+  const scrollBehavior = () => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+  function listOrder() {
+    const name = (id) => { const r = runeById(id); return r ? r.name : id; };
+    const ids = [...new Set(items.map((p) => p.runeId))].sort((a, b) => name(a).localeCompare(name(b)));
+    const out = [];
+    for (const id of ids) out.push(...items.filter((p) => p.runeId === id).sort((a, b) => (b.flags.length > 0) - (a.flags.length > 0) || a.uid - b.uid));
+    return out;
+  }
+  // After a confirm or an edit, move to the next row that still needs a check. When none are left, open the recap.
+  function scrollAfterRow(uid) {
+    const order = listOrder();
+    const i = order.findIndex((p) => p.uid === uid);
+    const current = i >= 0 ? order[i] : null;
+    const later = order.slice(i + 1).find((p) => p.flags.length);
+    const earlier = order.slice(0, Math.max(i, 0)).find((p) => p.flags.length);
+    const next = later || (current && current.flags.length ? null : earlier);
+    const behavior = scrollBehavior();
+    if (next) {
+      const li = $("plist").querySelector(`[data-u="${next.uid}"]`);
+      if (li) {
+        li.scrollIntoView({ behavior, block: "center" });
+        const btn = li.querySelector("[data-act=ok]");
+        if (btn) btn.focus({ preventScroll: true });
+      }
+    } else if (!items.some((p) => p.flags.length)) {
+      $("sec-recap").scrollIntoView({ behavior, block: "start" });
+    }
+  }
   $("fAll").addEventListener("click", () => { filter = "all"; renderCheck(); });
   $("fCheck").addEventListener("click", () => { filter = "check"; renderCheck(); });
   $("addItem").addEventListener("click", () => {
@@ -291,6 +320,7 @@
   });
   $("plist").addEventListener("change", (e) => {
     const f = e.target.dataset.f, p = itemOf(e.target); if (!f || !p) return;
+    const hadFlags = p.flags.length > 0;
     const li = e.target.closest("li");
     if (f === "rune") {
       p.runeId = e.target.value;
@@ -324,12 +354,16 @@
       e.target.value = String(p.copies);
     } else if (f === "equipped") p.equipped = e.target.checked;
     renderRecap(); invalidateShare();
+    if (hadFlags) scrollAfterRow(p.uid);
   });
   $("plist").addEventListener("click", (e) => {
     const b = e.target.closest("button[data-act]"); if (!b) return; const p = itemOf(b); if (!p) return;
+    const id = p.uid;
     if (b.dataset.act === "ok") p.flags = [];
     else if (b.dataset.act === "rm") items = items.filter((x) => x !== p);
     renderAll();
+    if (b.dataset.act === "ok") scrollAfterRow(id);
+    else if (!items.some((x) => x.flags.length)) $("sec-recap").scrollIntoView({ behavior: scrollBehavior(), block: "start" });
   });
 
   // ---------- Recap ----------

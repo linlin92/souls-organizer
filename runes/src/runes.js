@@ -457,8 +457,9 @@
         const runes = matchRune(matcher, img, rect);
         if (!runes[0]) return;
         const tile = { row: ri, col: ci, rect, grade, copies: readCopies(img, rect, templates), equipped: equipped(img, rect), flags: [], runeId: runes[0].id, runeName: runes[0].name, runeScore: runes[0].score, runeMargin: runes[0].score - (runes[1] ? runes[1].score : 0) };
-        // A bright passing glint can close the gap a little. A high score still names the rune.
-        if (tile.runeScore < 0.55 || (tile.runeMargin < 0.08 && tile.runeScore < 0.82)) tile.flags.push("Not sure which rune");
+        // A stack number can cover part of the glyph and pull the score down. A clear gap to the next rune still names it.
+        // A close call, or a very low score, still needs a check.
+        if (tile.runeScore < 0.45 || (tile.runeMargin < 0.08 && tile.runeScore < 0.82) || (tile.runeScore < 0.55 && tile.runeMargin < 0.12)) tile.flags.push("Not sure which rune");
         if (grade === "divine") {
           const div = matchDivine(matcher, img, rect);
           if (div[0]) {
@@ -511,6 +512,15 @@
       }
     }
     for (const b of g.rows.slice(4)) add("past-four", b[0], b[1]);
+    // A row half-hidden behind Filter Applied can be only a thin strip of frame, too short to be a cut band.
+    // If that strip is about as wide as the grid, show it as skipped and do not read it.
+    const bottomNoted = skipped.some((s) => s.kind === "filter" || s.kind === "bottom-crop" || s.kind === "past-four");
+    if (!bottomNoted && g.cols.length) {
+      const gridW = g.cols[g.cols.length - 1][1] - g.cols[0][0];
+      const yA = Math.round(last + pitch * 0.22);
+      const yB = Math.min(img.height, Math.round(last + pitch * 0.72));
+      if (yB - yA >= 8 && frameSpan(img, yA, yB, 0, img.width) > gridW * 0.55) add("filter", yA, yB);
+    }
     return { tiles, skipped, rows: rows.length, cols: g.cols.length };
   }
   function tally(tiles) {
