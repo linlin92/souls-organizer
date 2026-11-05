@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tier List · SOULS ORGANIZER</title>
+<link rel="icon" type="image/png" href="../logo.png">
+<style>
+@font-face{font-family:"Cinzel";src:url(../artifact/fonts/cinzel-700.woff2) format("woff2");font-weight:700;font-display:swap}
+:root{--bg:#14100b;--panel:#201912;--line:#4d3f27;--line2:#5a4a2e;--gold:#e3b95b;--gold2:#c99a3b;--ink:#f0e6d2;--mut:#a89a7c}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45;color:var(--ink);
+  background:radial-gradient(1100px 520px at 18% -8%,#2f2214 0,transparent 62%),repeating-linear-gradient(45deg,rgba(255,255,255,.014) 0 2px,transparent 2px 5px),var(--bg)}
+a{color:inherit}
+:focus-visible{outline:3px solid #f3d98f;outline-offset:3px}
+.wrap{max-width:1080px;margin:0 auto;padding:1.6rem 1.1rem 3.2rem}
+.top{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.brand img{width:40px;height:40px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(227,185,91,.45))}
+.brand span{font-family:"Cinzel","Palatino Linotype",Palatino,Georgia,serif;letter-spacing:.04em;font-size:.95rem}
+.back{color:var(--mut);text-decoration:none;font-size:.92rem}
+.back:hover{color:var(--gold)}
+h1{margin:1.15rem 0 0;font-family:"Cinzel","Palatino Linotype",Palatino,Georgia,serif;font-size:1.85rem;letter-spacing:.04em;font-weight:700}
+.lead{margin:.4rem 0 0;color:var(--mut);max-width:40rem}
+.races{display:flex;flex-wrap:wrap;gap:.5rem;margin:1.25rem 0 .9rem}
+.races button{min-height:44px;padding:0 1rem;border-radius:999px;border:1px solid var(--line2);background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.races button[aria-selected="true"]{background:linear-gradient(180deg,#f0d487,#c99a3b);color:#1b1208;border-color:transparent;font-weight:700}
+.legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem;margin:0 0 1rem}
+.legend div{padding:.7rem .75rem;border:1px solid var(--line);border-radius:12px;background:rgba(32,25,18,.72)}
+.legend strong{display:block;font-family:"Cinzel",Palatino,Georgia,serif;color:var(--gold);font-size:.92rem;letter-spacing:.03em}
+.legend span{display:block;margin-top:.2rem;color:var(--mut);font-size:.82rem}
+.board-wrap{position:relative}
+.board-scroll{overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:16px;background:rgba(32,25,18,.88);padding:.4rem .2rem .8rem;touch-action:pan-y;cursor:grab;overscroll-behavior-x:contain;user-select:none}
+.board-scroll.grabbing{cursor:grabbing}
+.board-scroll img{-webkit-user-drag:none;user-select:none}
+.board{min-width:760px}
+.drag-hint{display:flex;margin:0 0 .4rem;align-items:center;gap:.35rem;color:var(--gold);font-size:.8rem;letter-spacing:.03em}
+.drag-hint .chev{display:inline-block;font-size:1rem;line-height:1}
+@media (prefers-reduced-motion:no-preference){
+  .drag-hint .chev:first-child{animation:nudge-left 1.1s ease-in-out infinite}
+  .drag-hint .chev:last-child{animation:nudge-right 1.1s ease-in-out infinite}
+}
+@keyframes nudge-left{50%{transform:translateX(-4px)}}
+@keyframes nudge-right{50%{transform:translateX(4px)}}
+.head,.row{display:grid;grid-template-columns:76px repeat(4,minmax(0,1fr));align-items:start}
+.head{padding:.7rem .35rem .45rem;color:var(--gold);font-family:"Cinzel",Palatino,Georgia,serif;letter-spacing:.06em;font-size:.82rem;text-align:center}
+.head span:first-child{visibility:hidden}
+.row{padding:.55rem .35rem .7rem;border-top:1px solid rgba(227,185,91,.28)}
+.badge{width:52px;height:58px;margin:6px auto 0;display:flex;align-items:center;justify-content:center;font-family:"Cinzel",Palatino,Georgia,serif;font-size:1.55rem;color:var(--gold);
+  border:1px solid var(--gold2);border-radius:10px;background:radial-gradient(circle at 50% 40%,#3a2c18,#1a140e 72%);box-shadow:inset 0 0 0 3px rgba(20,16,11,.65)}
+.cell{display:flex;flex-wrap:wrap;gap:.55rem .4rem;justify-content:center;min-height:8px;padding:0 .15rem}
+.hero{width:78px;margin:0;text-align:center}
+.face{position:relative;width:64px;height:64px;margin:0 auto}
+.face img{width:64px;height:64px;object-fit:cover;object-position:center 18%;border-radius:0;border:1px solid #6a5734;background:#120e0a;display:block}
+.gem{position:absolute;top:-5px;right:-5px;width:11px;height:11px;background:linear-gradient(135deg,#ffe1a3,#ff8a1e);transform:rotate(45deg);box-shadow:0 0 8px rgba(255,140,30,.85)}
+.hero figcaption{margin-top:.28rem;font-size:.75rem;color:var(--ink);line-height:1.2}
+.off{margin:.75rem 0 0;color:var(--mut);font-size:.85rem}
+.notes{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:1.2rem}
+.notes article{padding:1rem 1.05rem;border:1px solid var(--line);border-radius:14px;background:rgba(32,25,18,.72)}
+.notes h2{margin:0 0 .4rem;font-family:"Cinzel",Palatino,Georgia,serif;font-size:1.05rem;color:var(--gold);letter-spacing:.03em;font-weight:700}
+.notes p{margin:.35rem 0 0;color:var(--ink);font-size:.92rem}
+.notes .wide{grid-column:1 / -1}
+.synergy{margin-top:1.1rem;padding:1.05rem 1.1rem 1.15rem;border:1px solid var(--line);border-radius:14px;background:rgba(32,25,18,.72)}
+.synergy h2,.synergy h3{margin:0;font-family:"Cinzel",Palatino,Georgia,serif;color:var(--gold);letter-spacing:.03em;font-weight:700}
+.synergy h2{font-size:1.15rem}
+.synergy h3{margin-top:1.05rem;font-size:.95rem}
+.synergy > p{margin:.45rem 0 0}
+.example{display:flex;gap:.75rem;align-items:flex-start;margin:.75rem 0 0;padding:.15rem 0 .15rem .75rem;border-left:2px solid rgba(227,185,91,.45)}
+.example strong{display:block}
+.example p{margin:.15rem 0 0}
+.faces{display:flex;gap:.3rem;flex:none}
+.faces img{width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:center 18%;border:1px solid #6a5734;background:#120e0a;display:block}
+.closer{margin:.95rem 0 0;color:var(--mut);font-style:italic}
+@media (max-width:760px){
+  .legend,.notes{grid-template-columns:1fr}
+  .notes .wide{grid-column:auto}
+  h1{font-size:1.5rem}
+}
+</style></head><body>
+<main class="wrap">
+  <div class="top">
+    <a class="brand" href="../"><img src="../logo.png" alt="" width="40" height="40"><span>SOULS ORGANIZER</span></a>
+    <a class="back" href="../">All apps</a>
+  </div>
+  <h1>Race tier list</h1>
+  <p class="lead">Who is worth building, one race at a time. Portraits and names come from the hero list. Rank, column, and the engraving diamond follow the race boards, with your corrections on top.</p>
+  <div class="races" role="tablist" id="races"></div>
+  <div class="legend">
+    <div><strong>Dealer</strong><span>The main offensive anchor.</span></div>
+    <div><strong>Sub Dealer</strong><span>Gives up some support power for personal damage. Sometimes used as the dealer.</span></div>
+    <div><strong>Support</strong><span>Buffs, debuffs, and control. Usually not there for damage.</span></div>
+    <div><strong>Survival</strong><span>The main defensive anchor.</span></div>
+  </div>
+  <div class="board-wrap">
+    <p class="drag-hint"><span class="chev" aria-hidden="true">‹</span> Drag to see more <span class="chev" aria-hidden="true">›</span></p>
+    <div class="board-scroll" id="boardScroll" tabindex="0" aria-label="Hero board. Drag sideways to see every column.">
+      <div class="board" id="board"></div>
+    </div>
+  </div>
+  <p class="off" id="off"></p>
+  <section class="notes">
+    <article>
+      <h2>The engraving mark</h2>
+      <p>An orange diamond means that hero is further enhanced with Engraving. Lupico is the example of an energy battery, and Dmitri of a damage cap. Stars are a separate question: Roze shines at 18 stars, while LuLu and Solina already work at low stars.</p>
+    </article>
+    <article>
+      <h2>A glance, not a team</h2>
+      <p>These recommendations can differ from other playstyles. Synergy matters, and a lower rank can still be the right pick for a specific fight. One pairing from the guide: Rakan’s silence lets Carmen and Benzel do their damage.</p>
+    </article>
+    <article class="wide">
+      <h2>Building from the list</h2>
+      <p>The boards are a wishlist aid for the SOULS content, the progression from early to mid may differ. The first five wishlist picks can follow the top of a race.</p>
+    </article>
+  </section>
+  <section class="synergy">
+    <h2>Understanding synergy</h2>
+    <h3>Placement</h3>
+    <p>Placement is key. A solid roster still falls short if the composition has no synergy, and the heroes never get used fully. Common examples:</p>
+    <div class="example">
+      <div class="faces"><img src="icons/richelle.png" alt=""></div>
+      <div>
+        <strong>Richelle</strong>
+        <p>He needs to stand next to allies so Damage Cap covers them, which lets the comp last much further into Journey. He usually sits in the second row, with a hero in front to sustain and tank, such as Carmen, Calix, Nuel, or Rakan.</p>
+      </div>
+    </div>
+    <div class="example">
+      <div class="faces"><img src="icons/lilith.png" alt=""></div>
+      <div>
+        <strong>Lilith</strong>
+        <p>A strong dealer into several frontliners. Against multiple enemies she deals big damage, drains their energy, and keeps going. She also lines up with Zagrako and Sander for some obstacles in Journey.</p>
+      </div>
+    </div>
+    <h3>Heroes</h3>
+    <p>Not every hero works if you drop them in at random. Some low-star heroes, and even low-tier ones, do very well in a specific case.</p>
+    <div class="example">
+      <div class="faces">
+        <img src="icons/rakan.png" alt="Rakan">
+        <img src="icons/lagou.png" alt="Lagou">
+        <img src="icons/zagrako.png" alt="Zagrako">
+        <img src="icons/ash.png" alt="Ash">
+      </div>
+      <div>
+        <strong>Sacrificial heroes</strong>
+        <p>Rakan, Lagou, Zagrako, Ash, and Luke. Their kit lets a debuff or a buff land, and that is what the team gains from them.</p>
+      </div>
+    </div>
+    <div class="example">
+      <div>
+        <strong>Bakra</strong>
+        <p>Even at low stars, Bakra holds several attacks through his Strengthen passive.</p>
+      </div>
+    </div>
+    <div class="example">
+      <div class="faces">
+        <img src="icons/galan.png" alt="Galan">
+        <img src="icons/idina.png" alt="Idina">
+        <img src="icons/olga.png" alt="Olga">
+      </div>
+      <div>
+        <strong>Utility heroes</strong>
+        <p>Galan, Idina, and Olga. Useful for a given stage. Which one you bring changes with the chapter, and with engraving.</p>
+      </div>
+    </div>
+    <p class="closer">There are many cases where these factors decide the best result.</p>
+  </section>
+</main>
+<script>
+const DATA = {"human": {"label": "Human", "rows": [{"rank": "S", "cols": {"dealer": [{"id": "idina", "name": "Idina", "engraved": true}, {"id": "milia", "name": "Milia", "engraved": false}], "support": [{"id": "richelle", "name": "Richelle", "engraved": false}, {"id": "rakan", "name": "Rakan", "engraved": false}]}}, {"rank": "A", "cols": {"dealer": [{"id": "ken", "name": "Ken", "engraved": true}], "support": [{"id": "calix", "name": "Calix", "engraved": true}, {"id": "adora", "name": "Adora", "engraved": true}]}}, {"rank": "B", "cols": {"sub": [{"id": "liandra", "name": "Liandra", "engraved": true}], "support": [{"id": "scarlet", "name": "Scarlet", "engraved": true}, {"id": "odelia", "name": "Odelia", "engraved": false}]}}, {"rank": "C", "cols": {"sub": [{"id": "kyle", "name": "Kyle", "engraved": false}, {"id": "karim", "name": "Karim", "engraved": false}], "support": [{"id": "morra", "name": "Morra", "engraved": false}, {"id": "olga", "name": "Olga", "engraved": false}]}}], "off": []}, "horde": {"label": "Horde", "rows": [{"rank": "S", "cols": {"dealer": [{"id": "jack", "name": "Jack", "engraved": true}, {"id": "nevir", "name": "Nevir", "engraved": true}], "support": [{"id": "lupico", "name": "Lupico", "engraved": true}], "survival": [{"id": "paopao", "name": "Paopao", "engraved": true}]}}, {"rank": "A", "cols": {"sub": [{"id": "dolucos", "name": "Dolucos", "engraved": false}], "support": [{"id": "paru", "name": "Paru", "engraved": false}]}}, {"rank": "B", "cols": {"dealer": [{"id": "telfer", "name": "Telfer", "engraved": true}]}}, {"rank": "C", "cols": {"dealer": [{"id": "kaion", "name": "Kaion", "engraved": false}], "sub": [{"id": "bella", "name": "Bella", "engraved": false}, {"id": "sol", "name": "Sol", "engraved": false}], "support": [{"id": "naru", "name": "Naru", "engraved": false}, {"id": "aruru", "name": "Aruru", "engraved": false}, {"id": "shabeck", "name": "Shabeck", "engraved": false}, {"id": "lagou", "name": "Lagou", "engraved": false}]}}], "off": []}, "elf": {"label": "Elf", "rows": [{"rank": "S", "cols": {"dealer": [{"id": "sander", "name": "Sander", "engraved": true}], "support": [{"id": "lulu", "name": "LuLu", "engraved": false}, {"id": "elara", "name": "Elara", "engraved": true}], "survival": [{"id": "abala", "name": "Abala", "engraved": false}]}}, {"rank": "A", "cols": {"dealer": [{"id": "tania", "name": "Tania", "engraved": true}]}}, {"rank": "B", "cols": {"sub": [{"id": "serena", "name": "Serena", "engraved": true}], "support": [{"id": "galan", "name": "Galan", "engraved": false}, {"id": "maelin", "name": "Maelin", "engraved": true}]}}, {"rank": "C", "cols": {"sub": [{"id": "oneiric", "name": "Oneiric", "engraved": false}], "support": [{"id": "aolmond", "name": "Aolmond", "engraved": false}, {"id": "fiona", "name": "Fiona", "engraved": false}, {"id": "coco", "name": "CoCo", "engraved": false}], "survival": [{"id": "babu", "name": "Babu", "engraved": false}, {"id": "chiron", "name": "Chiron", "engraved": false}]}}], "off": []}, "undead": {"label": "Undead", "rows": [{"rank": "S", "cols": {"dealer": [{"id": "carmen", "name": "Carmen", "engraved": true}], "support": [{"id": "melantha", "name": "Melantha", "engraved": true}], "survival": [{"id": "nox", "name": "Nox", "engraved": true}]}}, {"rank": "A", "cols": {"dealer": [{"id": "ripper", "name": "Ripper", "engraved": true}], "support": [{"id": "zenon", "name": "Zenon", "engraved": true}, {"id": "dextor", "name": "Dextor", "engraved": false}], "survival": [{"id": "muerte", "name": "Muerte", "engraved": true}]}}, {"rank": "B", "cols": {"sub": [{"id": "void", "name": "Void", "engraved": false}, {"id": "louveti", "name": "Louveti", "engraved": true}]}}, {"rank": "C", "cols": {"sub": [{"id": "fleta", "name": "Fleta", "engraved": false}], "support": [{"id": "sekhrus", "name": "Sekhrus", "engraved": false}, {"id": "amanda", "name": "Amanda", "engraved": false}, {"id": "ash", "name": "Ash", "engraved": false}], "survival": [{"id": "harfa", "name": "Harfa", "engraved": false}]}}], "off": []}, "light": {"label": "Light", "rows": [{"rank": "S", "cols": {"dealer": [{"id": "leovalt", "name": "Leovalt", "engraved": true}], "support": [{"id": "solina", "name": "Solina", "engraved": true}]}}, {"rank": "A", "cols": {"support": [{"id": "nuel", "name": "Nuel", "engraved": false}, {"id": "lumen", "name": "Lumen", "engraved": true}]}}, {"rank": "B", "cols": {"sub": [{"id": "jakel", "name": "Jakel", "engraved": true}], "support": [{"id": "lena", "name": "Lena", "engraved": false}], "survival": [{"id": "akmon", "name": "Akmon", "engraved": true}]}}, {"rank": "C", "cols": {"sub": [{"id": "ulion", "name": "Ulion", "engraved": false}], "support": [{"id": "rael", "name": "Rael", "engraved": false}], "survival": [{"id": "taros", "name": "Taros", "engraved": false}]}}], "off": []}, "darkness": {"label": "Dark", "rows": [{"rank": "S", "cols": {"dealer": [{"id": "lilith", "name": "Lilith", "engraved": true}, {"id": "roze", "name": "Roze", "engraved": true}], "sub": [{"id": "benzel", "name": "Benzel", "engraved": true}], "support": [{"id": "dmitri", "name": "Dmitri", "engraved": true}]}}, {"rank": "A", "cols": {"support": [{"id": "zagrako", "name": "Zagrako", "engraved": false}], "survival": [{"id": "zeke", "name": "Zeke", "engraved": true}, {"id": "feruki", "name": "Feruki", "engraved": false}]}}, {"rank": "B", "cols": {"support": [{"id": "nebula", "name": "Nebula", "engraved": true}]}}, {"rank": "C", "cols": {"sub": [{"id": "bahzam", "name": "Bahzam", "engraved": false}], "support": [{"id": "vescura", "name": "Vescura", "engraved": true}]}}], "off": []}};
+const ORDER = ["human","horde","elf","undead","light","darkness"];
+const COLS = [["dealer","Dealer"],["sub","Sub Dealer"],["support","Support"],["survival","Survival"]];
+const races = document.getElementById("races");
+const board = document.getElementById("board");
+const off = document.getElementById("off");
+function show(id) {
+  if (!DATA[id]) id = "human";
+  history.replaceState(null, "", "#" + id);
+  for (const b of races.querySelectorAll("button")) b.setAttribute("aria-selected", b.dataset.id === id ? "true" : "false");
+  const d = DATA[id];
+  let html = '<div class="head"><span></span>' + COLS.map(([,l]) => '<span>' + l + '</span>').join('') + '</div>';
+  for (const row of d.rows) {
+    html += '<div class="row"><div class="badge">' + row.rank + '</div>';
+    for (const [col] of COLS) {
+      const cells = row.cols[col] || [];
+      html += '<div class="cell">';
+      for (const h of cells) {
+        const gem = h.engraved ? '<i class="gem" title="Further enhanced with Engraving"></i>' : '';
+        html += '<figure class="hero"><div class="face"><img draggable="false" src="icons/' + h.id + '.png" alt="' + h.name + '">' + gem + '</div><figcaption>' + h.name + '</figcaption></figure>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  board.innerHTML = html;
+  off.textContent = d.off.length ? "On the hero list, and not placed on this board: " + d.off.join(", ") + "." : "";
+}
+const scroller = document.getElementById("boardScroll");
+let drag = null;
+scroller.addEventListener("pointerdown", (e) => {
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  if (e.pointerType === "mouse") e.preventDefault();
+  drag = { x: e.clientX, y: e.clientY, id: e.pointerId, axis: null };
+});
+scroller.addEventListener("pointermove", (e) => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const dx = e.clientX - drag.x;
+  const dy = e.clientY - drag.y;
+  if (!drag.axis) {
+    if (Math.hypot(dx, dy) < 3) return;
+    if (Math.abs(dy) > Math.abs(dx)) { drag = null; return; }
+    drag.axis = "x";
+    scroller.classList.add("grabbing");
+    scroller.setPointerCapture(e.pointerId);
+  }
+  scroller.scrollLeft -= dx;
+  drag.x = e.clientX;
+  drag.y = e.clientY;
+});
+function endDrag(e) {
+  if (!drag || e.pointerId !== drag.id) return;
+  drag = null;
+  scroller.classList.remove("grabbing");
+}
+scroller.addEventListener("pointerup", endDrag);
+scroller.addEventListener("pointercancel", endDrag);
+for (const id of ORDER) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.role = "tab";
+  b.dataset.id = id;
+  b.textContent = DATA[id].label;
+  b.addEventListener("click", () => show(id));
+  races.appendChild(b);
+}
+show((location.hash || "#human").slice(1));
+window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+</script>
+</body></html>

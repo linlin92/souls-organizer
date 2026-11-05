@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Assemble the hub
         run: |
-          mkdir -p public/artifact/icons public/artifact/icons-old public/artifact/icons/ui public/artifact/fonts public/gear public/runes
+          mkdir -p public/artifact/icons public/artifact/icons-old public/artifact/icons/ui public/artifact/fonts public/gear public/runes public/tierlist
           cp hub/index.html public/index.html
           cp hub/logo.png public/logo.png
           mkdir -p public/assets
@@ -26,6 +26,8 @@ jobs:
           cp artifact/index.html public/artifact/index.html
           cp -r artifact/src artifact/data public/artifact/
           cp gear/index.html public/gear/index.html
+          cp tierlist/index.html public/tierlist/index.html
+          cp -r tierlist/icons public/tierlist/
           cp -r gear/src gear/data gear/icons gear/fonts public/gear/
           for f in artifact/icons/*.png artifact/icons-old/*.png artifact/icons/ui/*.png artifact/fonts/*.woff2; do
             base64 -d "$f" > "public/$f"
