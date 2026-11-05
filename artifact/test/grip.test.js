@@ -24,6 +24,26 @@ test("Grip of Hell (shot C): the 3-diamond tile reads 3 and the 1-diamond tile r
   assert.ok(!a.count && !b.count);
 });
 
+function cropImage(img, x, y, w, h) {
+  x = Math.max(0, Math.round(x)); y = Math.max(0, Math.round(y));
+  w = Math.min(img.width - x, Math.round(w)); h = Math.min(img.height - y, Math.round(h));
+  const data = Buffer.alloc(w * h * 4);
+  for (let yy = 0; yy < h; yy++) img.data.copy(data, yy * w * 4, ((y + yy) * img.width + x) * 4, ((y + yy) * img.width + x) * 4 + w * 4);
+  return { width: w, height: h, data };
+}
+const brief = (t) => [t.name, t.count, t.diamonds, t.flags.slice()];
+
+test("a tight crop of one full row is still read, with the same artifacts", () => {
+  const img = readPng(path.join(__dirname, "fixtures/grip/shotC.png"));
+  const full = V.analyze(img, { matcher, templates });
+  const row = full.rows.filter((r) => r.kind === "full")[1];
+  const x0 = Math.min(...row.cols.map((c) => c.rect.x)) - 8;
+  const x1 = Math.max(...row.cols.map((c) => c.rect.x + c.rect.w)) + 8;
+  const tight = V.analyze(cropImage(img, x0, row.top + 6, x1 - x0, row.bottom - row.top - 12), { matcher, templates });
+  assert.strictEqual(tight.rows.length, 1);
+  assert.deepStrictEqual(tight.rows[0].cols.map((c) => brief(c.tile)), row.cols.map((c) => brief(c.tile)));
+});
+
 test("the 3 shots together: Grip of Hell x6 and every other total as hand-counted from the screenshots; 53 artifacts, nothing needs a check", () => {
   const m = V.merge(["B", "C", "A"].map(shot));
   const tiles = m.tiles.filter((t) => !t.ignored);

@@ -335,9 +335,12 @@
     if (fulls.length) run2 = run2.slice(Math.max(0, fulls[0] - 1), Math.min(run2.length, fulls[fulls.length - 1] + 2));
     return run2.map((c) => {
       const topCut = topCutOf(c), botCut = botCutOf(c);
-      const row = { top: c.top, bottom: c.bottom, visTop: Math.max(c.top, c.vs), visBottom: Math.min(c.bottom, c.ve + 1), kind: topCut ? "top" : botCut ? "bottom" : "full", geo };
+      const tileH = c.bottom - c.top, edgeTol = 0.08 * tileH;
+      // A crop the player made slices the picture edge. The inventory window clips a row in the middle of a taller shot.
+      const photoEdge = (topCut && (c.top < edgeTol || c.vs <= 2)) || (botCut && (c.bottom > H - edgeTol || c.ve >= H - 2));
+      const row = { top: c.top, bottom: c.bottom, visTop: Math.max(c.top, c.vs), visBottom: Math.min(c.bottom, c.ve + 1), kind: topCut ? "top" : botCut ? "bottom" : "full", photoEdge, geo };
       // the Filter pill floats over the middle of a row cut by the grid window (not by the image edge)
-      if (row.kind === "bottom" && c.bottom <= H + tol) {
+      if (row.kind === "bottom" && !photoEdge && c.bottom <= H + tol) {
         const vb = row.visBottom, cxm = g.colX[2];
         row.pill = { x0: cxm - 1.34 * w, x1: cxm + 1.34 * w, y0: vb - 0.84 * w, y1: vb - 0.03 * w };
       }
@@ -810,10 +813,11 @@
     const shaky = (ra.rarity === "mythic" && hh < 27) || (ra.rarity === "legendary" && hh > 13);
     let rarity = ra.rarity;
     const tile = { rarity, partial, kind: row.kind, flags: [] };
-    // A row that the popup window (or the screenshot edge) cuts through is never read, never flagged and never counted: its count and Transcendence
-    // sit at the bottom of the tile, so anything read there is a guess (a half-hidden Mace of Judgment or Evidence of Miracle showed up as a
-    // "needs check, number none" row). The same artifact shows whole in the next overlapping screenshot, or the player adds it by hand.
-    if (partial) { tile.ignored = true; tile.blurred = true; tile.cutOff = true; return tile; }
+    // A row the inventory window cuts through is never read: its count and Transcendence sit at the bottom of the tile, so anything read there
+    // is a guess, and the same artifact shows whole in the next overlapping screenshot. A crop the player made is different: the picture edge
+    // slices a tile they meant to show, and when that tile is still clear it is read.
+    const span = band ? band[1] - band[0] : 1;
+    if (partial && (!row.photoEdge || span < 0.45 || looksBlurred(img, rect, band))) { tile.ignored = true; tile.blurred = true; tile.cutOff = true; return tile; }
     // "other" (Epic, Rare, an empty slot, or a frame the window fade washed out) stays skipped unless one icon is clearly it.
     // A weak guess there made the same bottom row read differently in two screenshots and broke the row merge.
     let sc = null;
@@ -828,7 +832,7 @@
     // The Filter pill floats over the middle of a row cut by the grid window: a tile it touches shows part of the pill (dark bar, the word
     // Filter, the funnel) over its artwork, so any match is a guess (it once turned a Mace of Judgment into a second Fervor). Skip it
     // quietly; the same artifact shows whole in the next overlapping screenshot.
-    if (row.kind === "bottom") {
+    if (row.kind === "bottom" && !row.photoEdge) {
       const pl = row.geo ? row.pill : { x0: PILL.x0 * W, x1: PILL.x1 * W, y0: PILL.y0 * W, y1: PILL.y1 * W };
       if (pl && rect.x + rect.w > pl.x0 && rect.x < pl.x1 && rect.y + rect.h > pl.y0 && rect.y < pl.y1) { tile.ignored = true; tile.blurred = true; tile.underPill = true; return tile; }
     }
@@ -851,7 +855,7 @@
     // a known free item (never a recipe material): skipped silently, not listed, not flagged, not counted
     if (tile.id.startsWith(IGNORE_PREFIX) && tile.idScore >= FLAG.idScore) { tile.ignored = true; tile.ignoreKind = "free item"; return tile; }
     if (tile.idScore < FLAG.idScore || tile.idMargin < FLAG.idMargin) tile.flags.push("Not sure which artifact, please pick");
-    const seeBottom = !partial || (band[1] > 0.97 && band[0] < 0.62);
+    const seeBottom = !partial || (band[1] >= 0.85 && band[0] < 0.62);
     if (seeBottom) {
       tile.equipped = isEquipped(img, rect);
       if (!tile.equipped) {
@@ -861,12 +865,11 @@
       }
     } else tile.flags.push("bottom of tile cut off (no copy count)");
     if (tile.id === FADED_ID) tile.diamonds = 0; // fodder never has diamonds
-    else if (rarity === "legendary" && (!partial || (band[0] < 0.4 && band[1] > 0.9))) {
+    else if (rarity === "legendary" && (!partial || (band[0] < 0.4 && band[1] >= 0.85))) {
       const d = detectDiamonds(img, rect);
       tile.diamonds = d.n;
       if (d.unsure) tile.flags.push("diamond count unsure");
     }
-    if (partial) tile.flags.push("only partly visible in this screenshot");
     return tile;
   }
 
@@ -890,7 +893,8 @@
   function cropCheck(analysis) {
     const H = analysis.height, tol = 0.04 * (analysis.tileH || 0);
     const clipped = analysis.rows.filter((r) => r.bottom > H + tol || r.top < -tol).length;
-    const topCut = !!(analysis.rows[0] && analysis.rows[0].kind === "top");
+    const unread = (r) => r.cols && r.cols.every((c) => !c.tile || c.tile.ignored);
+    const topCut = !!(analysis.rows[0] && analysis.rows[0].kind === "top" && unread(analysis.rows[0]));
     return { full: analysis.rows.filter((r) => r.kind === "full").length, clipped, cropped: clipped > 0 && !topCut, topCut };
   }
 
