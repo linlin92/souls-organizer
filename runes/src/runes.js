@@ -341,6 +341,7 @@
     const big = resample(img, rect.x - rect.w * 0.06, rect.y + rect.h * 0.52, rect.w * 0.55, rect.h * 0.52, bn);
     return rank(matcher.divines.map((d) => ({ id: d.id, name: d.name, short: d.short, score: slideScore(big, bn, d, matcher.divineW) })));
   }
+  // The E badge is black. A dim glow darkens the corner too, but less: up to 0.36 dark, the badge 0.55 or more.
   function equipped(img, rect) {
     let n = 0, dark = 0;
     const x0 = rect.x + rect.w * 0.7, x1 = rect.x + rect.w * 0.98, y0 = rect.y + rect.h * 0.7, y1 = rect.y + rect.h * 0.98;
@@ -349,7 +350,7 @@
       const p = px(img, x, y); n++;
       if (Math.max(p[0], p[1], p[2]) < 55) dark++;
     }
-    return n > 8 && dark / n > 0.28;
+    return n > 8 && dark / n > 0.45;
   }
   // The white number in the tile's bottom corner is how many copies. No number, and an E, are one rune.
   // templates: [{d, f:number[140]}] from the same digit shapes the gear and artifact pages use.
