@@ -526,7 +526,12 @@
     if (!items.length) { el.innerHTML = ""; return; }
     const T = Advisor.totals(items, data.artifacts, Vision.FADED_ID);
     const li = (r) => `<li class="r-${rar(r.id)}"><img class="ai" src="icons/${r.id}.png${SV ? "?v=" + SV : ""}" alt="" width="20" height="20">${esc(r.name)} <b>×${r.total}</b></li>`;
-    const grp = (title, list) => list.length ? `<h3 class="g">${title}</h3><ul>${list.map(li).join("")}</ul>` : "";
+    const grp = (title, list) => {
+      if (!list.length) return "";
+      const copies = list.reduce((s, r) => s + r.total, 0);
+      const head = copies === list.length ? title : `${title} · ${copies} copies, ${list.length} types`;
+      return `<h3 class="g">${head}</h3><ul>${list.map(li).join("")}</ul>`;
+    };
     el.innerHTML = `<h3 class="t">Your totals <span class="muted" style="font-weight:400;font-family:system-ui,sans-serif;font-size:.85rem">(copies of the same artifact are added together)</span></h3>${grp("Primal", T.primal)}${grp("Mythic", T.mythic)}${grp("Legendary", T.legendary)}${T.fodder ? `<div class="muted">Faded Artifact ×${T.fodder} (not used for crafting)</div>` : ""}`;
   }
   const collapsed = { primal: false, mythic: false, legendary: false }; // section open/closed state of the Check list
