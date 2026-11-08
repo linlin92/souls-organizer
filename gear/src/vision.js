@@ -316,7 +316,14 @@
         for (let y = vs; y <= ve; y++) for (let x = Math.round(gxc - hw); x <= Math.round(gxc + hw); x++) { if (x >= 0 && x < W) { if (!mask[y * W + x]) dk++; n++; } }
         if (n && dk / n >= 0.7) gut++;
       }
-      cand.push({ k, top, bottom, vs, ve, gut, ok: vs >= 0 && ve - vs >= 0.1 * w && gut >= 2 });
+      // a tile is mostly isColored (frame, artwork); the window's title bar is dark panel brown that can pass the 46 test above when the screen is a little brighter, but only about 0.1 of it is isColored
+      let col = 0;
+      if (vs >= 0) for (const xs of [x0, x4]) {
+        let m = 0, n = 0;
+        for (let y = vs; y <= ve; y++) for (let x = Math.round(xs + 0.05 * w); x < Math.round(xs + 0.95 * w); x++) { if (x >= 0 && x < W) { if (mask[y * W + x]) m++; n++; } }
+        if (n) col = Math.max(col, m / n);
+      }
+      cand.push({ k, top, bottom, vs, ve, gut, ok: vs >= 0 && ve - vs >= 0.1 * w && gut >= 2 && col >= 0.2 });
     }
     // keep the contiguous run of valid rows that contains the strongest (most visible) row
     let bestRun = null, run = [];
