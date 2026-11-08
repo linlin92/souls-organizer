@@ -7,6 +7,11 @@
   const URL_TEXT = "linlin92.github.io/souls-organizer";
   const W = 1100, PAD = 36;
   const fmt = (n) => Number(n || 0).toLocaleString("en-US");
+  // One number when every name is a single copy. Both numbers when copies and names disagree, so the heading cannot be read as a loss.
+  function countLabel(name, copies, types) {
+    if (copies === types) return `${name} (${copies})`;
+    return `${name} (${copies} copies, ${types} types)`;
+  }
 
   // ---------- model ----------
   // V = Advisor.view(res); state = { mythics: {id: copies}, legendaryCopies: {id: copies} }; data = { artifacts }
@@ -21,7 +26,14 @@
     const primals = Object.entries(state.primals || {}).filter(([, n]) => n > 0).map(([id, n]) => ({ id, name: nm(id), n })).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name));
     const legs = Object.entries(state.legendaryCopies || {}).filter(([, n]) => n > 0).map(([id, n]) => ({ id, name: nm(id), n, key: ingr.has(id) }))
       .sort((a, b) => (b.key - a.key) || b.n - a.n || a.name.localeCompare(b.name));
-    const owned = { mythics, mythicTotal: mythics.length, primals, primalTotal: primals.length, legendaries: legs, legendaryTotal: legs.length };
+    const sum = (rows) => rows.reduce((s, r) => s + r.n, 0);
+    // The parenthetical is copies, the same total the on-page recap adds up. Types stay beside it when a name is owned more than once,
+    // so "Death ×3" is not mistaken for a missing row. Every id with n > 0 is listed; nothing is dropped between the accepted inventory and the chips.
+    const owned = {
+      mythics, mythicCopies: sum(mythics), mythicTypes: mythics.length,
+      primals, primalCopies: sum(primals), primalTypes: primals.length,
+      legendaries: legs, legendaryCopies: sum(legs), legendaryTypes: legs.length,
+    };
     return { essence: (opts && opts.essence != null ? opts.essence : V.hero && V.hero.have != null ? V.hero.have : 0), pvp: !!V.pvp, can, owned, url: URL_TEXT };
   }
 
@@ -153,18 +165,18 @@
     const o = m.owned;
     if (draw) text("What you own", PAD, y + 28, 30, "700", T.ink, HEAD);
     y += 46;
-    if (draw) text(`MYTHICS (${o.mythicTotal})`, PAD, y + 18, 19, "700", T.mut);
+    if (draw) text(countLabel("MYTHICS", o.mythicCopies, o.mythicTypes), PAD, y + 18, 19, "700", T.mut);
     y += 28;
     if (o.mythics.length) { const f = chipGrid(c, T, o.mythics, imgs, PAD, y, draw); y += f.h; }
     else { if (draw) text("No Mythics yet", PAD, y + 20, 21, "500", T.mut); y += 28; }
     if (o.primals && o.primals.length) {
       y += 26;
-      if (draw) text(`PRIMALS (${o.primalTotal})`, PAD, y + 18, 19, "700", T.primal || T.mut);
+      if (draw) text(countLabel("PRIMALS", o.primalCopies, o.primalTypes), PAD, y + 18, 19, "700", T.primal || T.mut);
       y += 28;
       const f = chipGrid(c, T, o.primals, imgs, PAD, y, draw, "primal"); y += f.h;
     }
     y += 26;
-    if (draw) text(`LEGENDARIES (${o.legendaryTotal}) \u00b7 COPIES`, PAD, y + 18, 19, "700", T.mut);
+    if (draw) text(countLabel("LEGENDARIES", o.legendaryCopies, o.legendaryTypes), PAD, y + 18, 19, "700", T.mut);
     y += 28;
     if (o.legendaries.length) { const g = legGrid(c, T, o.legendaries, imgs, PAD, y, draw); y += g.h; }
     else { if (draw) text("No Legendaries yet", PAD, y + 20, 21, "500", T.mut); y += 28; }
@@ -193,5 +205,5 @@
     return cv;
   }
   const toBlob = (cv) => new Promise((res, rej) => cv.toBlob((b) => (b ? res(b) : rej(new Error("The picture could not be made"))), "image/png"));
-  return { URL_TEXT, WIDTH: W, model, render, toBlob, themeFromCss, DEFAULT_THEME, neededIds, fmt };
+  return { URL_TEXT, WIDTH: W, model, render, toBlob, themeFromCss, DEFAULT_THEME, neededIds, fmt, countLabel };
 });
